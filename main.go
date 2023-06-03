@@ -63,6 +63,7 @@ func main() {
 
 	// TODO multiple boards
 	boardState := island.NewBoardA()
+	boardState.AddPresence(1)
 
 	gameState := game_state.GameState{
 		InvaderState: invaderBoardState,

@@ -19,13 +19,13 @@ type LandState struct {
 	ExtraDefenseAdded int
 
 	// TODO support multiple players
-	PresenceTokens int
+	NumPresence int
 }
 
 func (state LandState) String() string {
 	lines := []string{
 		fmt.Sprintf("Type: %s", state.LandType.String()),
-		fmt.Sprintf("Presence: %d", state.PresenceTokens),
+		fmt.Sprintf("Presence: %d", state.NumPresence),
 		fmt.Sprintf(
 			"Explorers(%d) + Towns(%d) + Cities(%d)",
 			state.NumExplorers,

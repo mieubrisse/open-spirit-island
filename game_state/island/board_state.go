@@ -29,6 +29,7 @@ var columnConfigOverrides = []table.ColumnConfig{
 		}
 		return strings.Join(adjacentLandIdxStrs, ",")
 	}},
+	{Name: "Presence", Transformer: renderIntegerSkip0},
 	{Name: "Dahan", Transformer: renderIntegerSkip0},
 	{Name: "Explorers", Transformer: renderIntegerSkip0},
 	{Name: "Towns", Transformer: renderIntegerSkip0},
@@ -43,6 +44,12 @@ type IslandBoardState struct {
 
 	// Mapping of land_index -> bordering_land_indexes
 	Adjacencies [][]int
+}
+
+// TODO nice error-handling
+func (state IslandBoardState) AddPresence(landIdx int) IslandBoardState {
+	state.Lands[landIdx].NumPresence++
+	return state
 }
 
 // Gets the indexes of the adjacent lands, returned in sorted order
@@ -94,6 +101,7 @@ func (state IslandBoardState) String() string {
 			i,
 			land.LandType,
 			adjacentLandIdxs,
+			land.NumPresence,
 			land.NumDahan,
 			land.NumExplorers,
 			land.NumTowns,
