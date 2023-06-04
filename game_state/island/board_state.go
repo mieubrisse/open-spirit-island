@@ -1,6 +1,7 @@
 package island
 
 import (
+	"github.com/bobg/go-generics/v2/set"
 	"github.com/imdario/mergo"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
@@ -52,6 +53,25 @@ func (state IslandBoardState) AddPresence(landIdx int) IslandBoardState {
 	return state
 }
 
+// Calculates distances from the source land to all other lands
+func (state IslandBoardState) CalculateDistances(source int) []int {
+	result := make([]int, len(state.Lands))
+	result[source] = 0
+
+	// Lands for whom we've calculated a distance
+	calculatedLands := map[int]bool{}
+	adjacencies := state.GetAdjacentLands(source)
+	for _, adjacency := range adjacencies {
+
+		result[adjacency] = 1
+	}
+
+	for len(calculatedLands) < len(state.Lands) {
+
+	}
+
+}
+
 // TODO finish this
 /*
 func (state IslandBoardState) GetMatchingLands(selector LandSelector) []int {
@@ -90,9 +110,9 @@ func (state IslandBoardState) GetMatchingLands(selector LandSelector) []int {
 
 */
 
-// Gets the indexes of the adjacent lands, returned in sorted order
-func (state IslandBoardState) GetAdjacentLands(landIdx int) []int {
-	resultSet := map[int]bool{}
+// Gets the indexes of the adjacent lands
+func (state IslandBoardState) GetAdjacentLands(landIdx int) set.Of[int] {
+	resultSet := set.New[int]()
 	for _, pair := range state.Adjacencies {
 		if pair[0] == landIdx {
 			resultSet[pair[1]] = true
