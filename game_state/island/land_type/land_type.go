@@ -1,14 +1,16 @@
 package land_type
 
+import "github.com/bobg/go-generics/v2/set"
+
 //go:generate go run github.com/dmarkham/enumer -type=LandType
 type LandType int
 
 const (
-	// This should always be the 0th value, so we can throw an error if someone accidentally forgets to set this
-	Invalid LandType = iota
-	Jungle
+	Jungle LandType = iota
 	Wetlands
 	Desert
 	Mountain
 	Ocean
 )
+
+var NonOceanLandTypes = set.New(Jungle, Wetlands, Desert, Mountain)

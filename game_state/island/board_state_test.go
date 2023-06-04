@@ -28,6 +28,13 @@ func TestIslandBoardState_GetMatchingLands_AdjacentLands(t *testing.T) {
 			MinRange:      1,
 			MaxRange:      1,
 		})
-		require.Equal(t, expectedAdjacenciesForLand, actualAdjacencies)
+		require.Equal(t, expectedAdjacenciesForLand, actualAdjacencies, "Incorrect adjacencies for land %d", idx)
 	}
+}
+
+func TestIslandBoardState_GetMatchingLands_CoastalLands(t *testing.T) {
+	board := NewBoardA()
+
+	actualCoastalLands := board.FilterLands(filter.NewCoastalLandsFilter())
+	require.Equal(t, set.New(1, 2, 3), actualCoastalLands)
 }

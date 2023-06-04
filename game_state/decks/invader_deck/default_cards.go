@@ -35,13 +35,7 @@ func NewSingleTypeAndAdversaryInvaderCard(landType land_type.LandType) InvaderCa
 
 func NewCoastalLandsInvaderCard() InvaderCard {
 	return InvaderCard{
-		TargetedLandSelector: filter.IslandFilter{
-			SourceFilter: filter.LandFilter{
-				LandTypes: set.New(land_type.Ocean),
-			},
-			MinRange: 1,
-			MaxRange: 1,
-		},
+		TargetedLandSelector:  filter.NewCoastalLandsFilter(),
 		IsAdversaryActionCard: false,
 		HumanReadableStr:      "Coastal Lands",
 	}

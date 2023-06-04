@@ -1,7 +1,7 @@
 package invader_board
 
 import (
-	"github.com/mieubrisse/open-spirit-island/decks/fear"
+	"github.com/mieubrisse/open-spirit-island/game_state/decks/fear"
 	"github.com/stretchr/testify/require"
 	"testing"
 )

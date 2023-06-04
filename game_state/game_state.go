@@ -1,11 +1,16 @@
 package game_state
 
 import (
+	"fmt"
+	"github.com/bobg/go-generics/v2/set"
 	"github.com/mieubrisse/open-spirit-island/game_state/invader_board"
 	"github.com/mieubrisse/open-spirit-island/game_state/island"
+	"github.com/mieubrisse/open-spirit-island/game_state/island/filter"
 	"github.com/mieubrisse/open-spirit-island/game_state/island/land_type"
 	"github.com/mieubrisse/open-spirit-island/game_state/player"
 	"github.com/mieubrisse/open-spirit-island/game_state/status"
+	"github.com/mieubrisse/open-spirit-island/input"
+	"sort"
 	"strings"
 )
 
@@ -71,108 +76,12 @@ func (state GameState) GetStatus() status.GameStatus {
 	return status.Undecided
 }
 
-func (state GameState) Advance() GameState {
-	// Can't advance beyond victory or defeat
-	if state.GetStatus() != status.Undecided {
-		return state
-	}
-
-	// Ravage
-	ravageSlot := state.InvaderState.RavageSlot
-	if ravageSlot.IsCardPresent {
-		targetedLandIdxs := ravageSlot.MaybeCard.TargetedLandSelector(state.BoardState)
-
-		for _, targetedIdx := range targetedLandIdxs {
-			targetedLand := state.BoardState.Lands[targetedIdx]
-
-			// TODO ravage skips
-
-			// TODO battle mechanics
-
-			damageDealt := targetedLand.NumCities*3 + targetedLand.NumTowns*2 + targetedLand.NumExplorers
-			if damageDealt >= 2 {
-				// TODO defend
-
-				targetedLand.NumBlight++
-				state.BoardState.Lands[targetedIdx] = targetedLand
-
-				// TODO blight cascade
-			}
-
-			// TODO presence token destroy mechanics
-		}
-	}
-
-	// Build
-	buildSlot := state.InvaderState.BuildSlot
-	if buildSlot.IsCardPresent {
-		targetedLandIdxs := buildSlot.MaybeCard.TargetedLandSelector(state.BoardState)
-
-		for _, targetedIdx := range targetedLandIdxs {
-			targetedLand := state.BoardState.Lands[targetedIdx]
-			// TODO build skips
-
-			areInvadersPresent := targetedLand.NumCities > 0 || targetedLand.NumTowns > 0 || targetedLand.NumExplorers > 0
-			if !areInvadersPresent {
-				continue
-			}
-
-			if targetedLand.NumTowns > targetedLand.NumCities {
-				targetedLand.NumCities++
-			} else {
-				targetedLand.NumTowns++
-			}
-			state.BoardState.Lands[targetedIdx] = targetedLand
-		}
-	}
-
-	// Explore
-	explorerCard := state.InvaderState.RemainingInvaderDeck[0]
-	maybeLandsToExplore := explorerCard.TargetedLandSelector(state.BoardState)
-	for _, maybeLandToExploreIdx := range maybeLandsToExplore {
-		// TODO explore skip
-
-		maybeLandToExplore := state.BoardState.Lands[maybeLandToExploreIdx]
-		shouldExplorePredicates := []bool{
-			maybeLandToExplore.NumTowns > 0,
-			maybeLandToExplore.NumCities > 0,
-		}
-
-		// Drop lands not adjacent to the coast or town/city
-		adjacentLandIdxs := state.BoardState.GetAdjacentLands(maybeLandToExploreIdx)
-		for _, adjacentIdx := range adjacentLandIdxs {
-			adjacentLand := state.BoardState.Lands[adjacentIdx]
-
-			shouldExplorePredicates = append(
-				shouldExplorePredicates,
-				adjacentLand.LandType == land_type.Ocean,
-				adjacentLand.NumCities > 0,
-				adjacentLand.NumTowns > 0,
-			)
-		}
-
-		for _, predicate := range shouldExplorePredicates {
-			if predicate {
-				state.BoardState.Lands[maybeLandToExploreIdx].NumExplorers++
-				break
-			}
-		}
-	}
-
-	// Advance invader slots
-	state.InvaderState = state.InvaderState.AdvanceInvaderCards()
-
-	return state
-}
-
 func (state GameState) String() string {
 	lines := []string{
-		"========================================== INVADERS ==========================================",
 		state.InvaderState.String(),
-		"=========================================== BOARD ============================================",
 		state.BoardState.String(),
 		// TODO multiple players
-		"=========================================== PLAYER ===========================================",
+		"PLAYER",
 		state.PlayerState.String(),
 	}
 
@@ -192,3 +101,155 @@ func (state GameState) String() string {
 }
 
 // TODO get the score
+
+// Runs the invasion phase
+func (state GameState) RunInvaderPhase() GameState {
+	// Can't change the game state beyond victory or defeat
+	if state.GetStatus() != status.Undecided {
+		return state
+	}
+
+	liveInvaderLandsFilter := filter.IslandFilter{
+		TargetFilter: filter.LandFilter{
+			// This is needed because Ocean's Hungry Grasp can drown invaders
+			LandTypes:   land_type.NonOceanLandTypes,
+			InvadersMin: 1,
+		},
+	}
+	invaderLandIdxs := state.BoardState.FilterLands(liveInvaderLandsFilter)
+
+	// Ravage
+	ravageSlot := state.InvaderState.RavageSlot
+	if ravageSlot.IsCardPresent {
+		desiredRavageIdxs := state.BoardState.FilterLands(ravageSlot.MaybeCard.TargetedLandSelector)
+		actualRavageIdxs := set.Intersect(invaderLandIdxs, desiredRavageIdxs)
+
+		for landIdx := range actualRavageIdxs {
+			ravageLand := state.BoardState.Lands[landIdx]
+
+			// TODO ravage skips
+
+			// Battle
+			invaderDamage := ravageLand.NumExplorers + 2*ravageLand.NumTowns + 3*ravageLand.NumCities
+			dahanToRemove := invaderDamage / 2
+			remainingDahan := ravageLand.NumDahan - dahanToRemove
+			if remainingDahan < 0 {
+				remainingDahan = 0
+			}
+			state.BoardState.Lands[landIdx].NumDahan = remainingDahan
+
+			// TODO Dahan strike back
+
+			// TODO defend
+
+			damageDealt := ravageLand.NumCities*3 + ravageLand.NumTowns*2 + ravageLand.NumExplorers
+			if damageDealt >= 2 {
+
+				mustSpreadBlight := false
+				if ravageLand.NumBlight > 0 {
+					mustSpreadBlight = true
+				}
+				ravageLand.NumBlight++
+				state.BoardState.Lands[landIdx] = ravageLand
+
+				sourceLandIdx := landIdx
+				for mustSpreadBlight {
+					sourceLand := state.BoardState.Lands[sourceLandIdx]
+
+					adjacentLandIdxsSet := state.BoardState.FilterLands(filter.IslandFilter{
+						SourceNumbers: set.New(sourceLandIdx),
+						MinRange:      1,
+						MaxRange:      1,
+						TargetFilter:  filter.LandFilter{LandTypes: land_type.NonOceanLandTypes},
+					})
+					adjacentLandIdxs := adjacentLandIdxsSet.Slice()
+					sort.Ints(adjacentLandIdxs)
+
+					optionStrs := make([]string, len(adjacentLandIdxs))
+					for i, adjacentIdx := range adjacentLandIdxs {
+						adjacentLand := state.BoardState.Lands[adjacentIdx]
+						optionStrs[i] = fmt.Sprintf("%s #%d (%d Blight)", adjacentLand.LandType, adjacentIdx, adjacentLand.NumBlight)
+					}
+
+					selectedLandIdx := input.GetUserSelection(
+						fmt.Sprintf("%s #%d is suffering a Blight cascade; select an adjacent land to spread Blight to:", sourceLand.LandType, sourceLandIdx),
+						optionStrs,
+					)
+
+					selectedLand := state.BoardState.Lands[selectedLandIdx]
+
+					if selectedLand.NumBlight == 0 {
+						mustSpreadBlight = false
+					}
+
+					state.BoardState.Lands[selectedLandIdx].NumBlight++
+					sourceLandIdx = selectedLandIdx
+				}
+
+			}
+
+			// TODO presence token destroy mechanics
+		}
+	}
+
+	// Build
+	buildSlot := state.InvaderState.BuildSlot
+	if buildSlot.IsCardPresent {
+		desiredBuildIdxs := state.BoardState.FilterLands(buildSlot.MaybeCard.TargetedLandSelector)
+		actualBuildIdxs := set.Intersect(invaderLandIdxs, desiredBuildIdxs)
+
+		for landIdx := range actualBuildIdxs {
+			buildLand := state.BoardState.Lands[landIdx]
+			// TODO build skips
+
+			if buildLand.NumTowns > buildLand.NumCities {
+				buildLand.NumCities++
+			} else {
+				buildLand.NumTowns++
+			}
+			state.BoardState.Lands[landIdx] = buildLand
+		}
+	}
+
+	// Explore
+	coastalLandIdxs := state.BoardState.FilterLands(filter.NewCoastalLandsFilter())
+	townExplorableLandIdxs := state.BoardState.FilterLands(filter.IslandFilter{
+		SourceFilter: filter.LandFilter{
+			TownsMin: 1,
+		},
+		MinRange: 0,
+		MaxRange: 1,
+		TargetFilter: filter.LandFilter{
+			LandTypes: land_type.NonOceanLandTypes,
+		},
+	})
+	cityExplorableLandIdxs := state.BoardState.FilterLands(filter.IslandFilter{
+		SourceFilter: filter.LandFilter{
+			CitiesMin: 1,
+		},
+		MinRange: 0,
+		MaxRange: 1,
+		TargetFilter: filter.LandFilter{
+			LandTypes: land_type.NonOceanLandTypes,
+		},
+	})
+	explorableLandIdx := set.Union(coastalLandIdxs, townExplorableLandIdxs, cityExplorableLandIdxs)
+
+	explorerCard := state.InvaderState.RemainingInvaderDeck[0]
+	desiredExploreLandIdxs := state.BoardState.FilterLands(explorerCard.TargetedLandSelector)
+
+	toExploreLandIdxs := set.Intersect(explorableLandIdx, desiredExploreLandIdxs)
+
+	for landIdx := range toExploreLandIdxs {
+		state.BoardState.Lands[landIdx].NumExplorers++
+	}
+
+	// Advance invader slots
+	state.InvaderState = state.InvaderState.AdvanceInvaderCards()
+
+	return state
+}
+
+func (state GameState) BlightLand(idx int) GameState {
+
+}

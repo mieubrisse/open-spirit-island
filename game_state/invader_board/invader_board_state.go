@@ -2,11 +2,30 @@ package invader_board
 
 import (
 	"fmt"
-	"github.com/mieubrisse/open-spirit-island/decks/fear"
-	"github.com/mieubrisse/open-spirit-island/decks/invader_deck"
+	"github.com/imdario/mergo"
+	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/jedib0t/go-pretty/v6/text"
+	"github.com/mieubrisse/open-spirit-island/game_state/decks/fear"
+	"github.com/mieubrisse/open-spirit-island/game_state/decks/invader_deck"
 	"math"
 	"strings"
 )
+
+// The base column config, on which the overrides will be applied
+var baseColumnConfig = table.ColumnConfig{
+	Align:        text.AlignCenter,
+	VAlign:       text.VAlignMiddle,
+	AlignHeader:  text.AlignCenter,
+	VAlignHeader: text.VAlignMiddle,
+}
+
+// Overrides per column to apply on top of the base
+var columnConfigOverrides = []table.ColumnConfig{
+	{Name: ""},
+	{Name: "Fear Cards"},
+	{Name: "Fear"},
+	{Name: "Terror Level"},
+}
 
 type MaybeInvaderCard struct {
 	IsCardPresent bool
@@ -77,6 +96,50 @@ func (state InvaderBoardState) AdvanceInvaderCards() InvaderBoardState {
 }
 
 func (state InvaderBoardState) String() string {
+	tableWriter := table.NewWriter()
+	tableWriter.SetStyle(table.StyleLight)
+
+	columnConfigs := make([]table.ColumnConfig, len(columnConfigOverrides))
+	for idx, override := range columnConfigOverrides {
+		overriden := baseColumnConfig
+		mergo.Merge(&overriden, override)
+		columnConfigs[idx] = overriden
+	}
+
+	tableWriter.SetColumnConfigs(columnConfigs)
+
+	headerRow := make([]interface{}, len(columnConfigs))
+	for idx, columnConfig := range columnConfigs {
+		headerRow[idx] = columnConfig.Name
+	}
+	tableWriter.AppendHeader(headerRow)
+
+	tableWriter.AppendRows([]table.Row{
+		{
+			"UNEARNED",
+			len(state.UnearnedFearCards),
+			state.UnearnedFear,
+			fmt.Sprintf("Cards Till Next: %d", state.countFearCardsTillNextTerrorLevel()),
+		},
+		{
+			"EARNED",
+			len(state.EarnedFearCards),
+			state.EarnedFear,
+			state.GetTerrorLevel(),
+		},
+	})
+
+	/*
+		lines := []string{
+			fmt.Sprintf("Unearned Fear Cards: %d             Unearned Fear: %d       Terror Level: %d", len(state.UnearnedFearCards), state.GetTerrorLevel()),
+			fmt.Sprintf("Fear Till Next Card: %d", state.UnearnedFear),
+			fmt.Sprintf("Fear Cards Till Next Terror Level: %d", state.countFearCardsTillNextTerrorLevel()),
+			fmt.Sprintf("Earned Fear Cards: %d", len(state.EarnedFearCards)),
+		}
+	*/
+
+	fearTable := tableWriter.Render()
+
 	ravageLineContent := "<none>"
 	if state.RavageSlot.IsCardPresent {
 		ravageLineContent = state.RavageSlot.MaybeCard.String()
@@ -86,19 +149,18 @@ func (state InvaderBoardState) String() string {
 	if state.BuildSlot.IsCardPresent {
 		buildLineContent = state.BuildSlot.MaybeCard.String()
 	}
+	invasionLine := fmt.Sprintf(
+		"Ravage(%s) <- Build(%s) <- Deck(%d)",
+		ravageLineContent,
+		buildLineContent,
+		len(state.RemainingInvaderDeck),
+	)
 
 	lines := []string{
-		fmt.Sprintf("Terror Level: %d", state.GetTerrorLevel()),
-		fmt.Sprintf("Fear Till Next Card: %d", state.UnearnedFear),
-		fmt.Sprintf("Fear Cards Till Next Terror Level: %d", state.countFearCardsTillNextTerrorLevel()),
-		fmt.Sprintf("Earned Fear Cards: %d", len(state.EarnedFearCards)),
-		fmt.Sprintf(
-			"Ravage(%s) <- Build(%s) <- Deck(%d)",
-			ravageLineContent,
-			buildLineContent,
-			len(state.RemainingInvaderDeck),
-		),
+		fearTable,
+		invasionLine,
 	}
+
 	return strings.Join(lines, "\n")
 }
 

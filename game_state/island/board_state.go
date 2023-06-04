@@ -62,6 +62,7 @@ func (state IslandBoardState) AddPresence(landIdx int) IslandBoardState {
 	return state
 }
 
+// Swiss army knife for selecting lands on the island
 func (state IslandBoardState) FilterLands(filter filter.IslandFilter) set.Of[int] {
 	sourcesIdx := set.New[int]()
 	for idx, land := range state.Lands {
@@ -80,8 +81,8 @@ func (state IslandBoardState) FilterLands(filter filter.IslandFilter) set.Of[int
 	for sourceIdx := range sourcesIdx {
 		_, distancesInt64 := graph.ShortestPaths(state.Graph, sourceIdx)
 		distances := make([]int, len(distancesInt64))
-		for i, value := range distances {
-			distances[i] = value
+		for i, value := range distancesInt64 {
+			distances[i] = int(value)
 		}
 
 		for targetLandIdx, distance := range distances {
@@ -105,41 +106,6 @@ func (state IslandBoardState) FilterLands(filter filter.IslandFilter) set.Of[int
 
 	return result
 }
-
-// Gets the distances to all other lands from the given land
-func (state IslandBoardState) GetDistances(landIdx int) []int {
-	_, shortestPaths := graph.ShortestPaths(state.Graph, landIdx)
-	result := make([]int, len(shortestPaths))
-	for i, value := range shortestPaths {
-		result[i] = int(value)
-	}
-	return result
-}
-
-/*
-// Gets the indexes of the adjacent lands
-func (state IslandBoardState) GetAdjacentLands(landIdx int) set.Of[int] {
-
-	resultSet := set.New[int]()
-	for _, pair := range state.Adjacencies {
-		if pair[0] == landIdx {
-			resultSet[pair[1]] = true
-		}
-		if pair[1] == landIdx {
-			resultSet[pair[0]] = true
-		}
-	}
-
-	result := make([]int, 0, len(resultSet))
-	for adjacentLandIdx := range resultSet {
-		result = append(result, adjacentLandIdx)
-	}
-
-	sort.Ints(result)
-
-	return result
-}
-*/
 
 func (state IslandBoardState) String() string {
 	tableWriter := table.NewWriter()

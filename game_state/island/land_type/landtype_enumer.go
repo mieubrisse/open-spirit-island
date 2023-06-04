@@ -7,11 +7,11 @@ import (
 	"strings"
 )
 
-const _LandTypeName = "InvalidJungleWetlandsDesertMountainOcean"
+const _LandTypeName = "JungleWetlandsDesertMountainOcean"
 
-var _LandTypeIndex = [...]uint8{0, 7, 13, 21, 27, 35, 40}
+var _LandTypeIndex = [...]uint8{0, 6, 14, 20, 28, 33}
 
-const _LandTypeLowerName = "invalidjunglewetlandsdesertmountainocean"
+const _LandTypeLowerName = "junglewetlandsdesertmountainocean"
 
 func (i LandType) String() string {
 	if i < 0 || i >= LandType(len(_LandTypeIndex)-1) {
@@ -24,38 +24,34 @@ func (i LandType) String() string {
 // Re-run the stringer command to generate them again.
 func _LandTypeNoOp() {
 	var x [1]struct{}
-	_ = x[Invalid-(0)]
-	_ = x[Jungle-(1)]
-	_ = x[Wetlands-(2)]
-	_ = x[Desert-(3)]
-	_ = x[Mountain-(4)]
-	_ = x[Ocean-(5)]
+	_ = x[Jungle-(0)]
+	_ = x[Wetlands-(1)]
+	_ = x[Desert-(2)]
+	_ = x[Mountain-(3)]
+	_ = x[Ocean-(4)]
 }
 
-var _LandTypeValues = []LandType{Invalid, Jungle, Wetlands, Desert, Mountain, Ocean}
+var _LandTypeValues = []LandType{Jungle, Wetlands, Desert, Mountain, Ocean}
 
 var _LandTypeNameToValueMap = map[string]LandType{
-	_LandTypeName[0:7]:        Invalid,
-	_LandTypeLowerName[0:7]:   Invalid,
-	_LandTypeName[7:13]:       Jungle,
-	_LandTypeLowerName[7:13]:  Jungle,
-	_LandTypeName[13:21]:      Wetlands,
-	_LandTypeLowerName[13:21]: Wetlands,
-	_LandTypeName[21:27]:      Desert,
-	_LandTypeLowerName[21:27]: Desert,
-	_LandTypeName[27:35]:      Mountain,
-	_LandTypeLowerName[27:35]: Mountain,
-	_LandTypeName[35:40]:      Ocean,
-	_LandTypeLowerName[35:40]: Ocean,
+	_LandTypeName[0:6]:        Jungle,
+	_LandTypeLowerName[0:6]:   Jungle,
+	_LandTypeName[6:14]:       Wetlands,
+	_LandTypeLowerName[6:14]:  Wetlands,
+	_LandTypeName[14:20]:      Desert,
+	_LandTypeLowerName[14:20]: Desert,
+	_LandTypeName[20:28]:      Mountain,
+	_LandTypeLowerName[20:28]: Mountain,
+	_LandTypeName[28:33]:      Ocean,
+	_LandTypeLowerName[28:33]: Ocean,
 }
 
 var _LandTypeNames = []string{
-	_LandTypeName[0:7],
-	_LandTypeName[7:13],
-	_LandTypeName[13:21],
-	_LandTypeName[21:27],
-	_LandTypeName[27:35],
-	_LandTypeName[35:40],
+	_LandTypeName[0:6],
+	_LandTypeName[6:14],
+	_LandTypeName[14:20],
+	_LandTypeName[20:28],
+	_LandTypeName[28:33],
 }
 
 // LandTypeString retrieves an enum value from the enum constants string name.
