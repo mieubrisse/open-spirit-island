@@ -1,20 +1,33 @@
 package island
 
 import (
+	"github.com/bobg/go-generics/v2/set"
+	"github.com/mieubrisse/open-spirit-island/game_state/island/filter"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
 
-func TestIslandBoardState_GetAdjacentLands(t *testing.T) {
+func TestIslandBoardState_GetMatchingLands_AdjacentLands(t *testing.T) {
 	board := NewBoardA()
 
-	require.Equal(t, []int{1, 2, 3}, board.GetAdjacentLands(0))
-	require.Equal(t, []int{0, 2, 4, 5, 6}, board.GetAdjacentLands(1))
-	require.Equal(t, []int{0, 1, 3, 4}, board.GetAdjacentLands(2))
-	require.Equal(t, []int{0, 2, 4}, board.GetAdjacentLands(3))
-	require.Equal(t, []int{1, 2, 3, 5}, board.GetAdjacentLands(4))
-	require.Equal(t, []int{1, 4, 6, 7, 8}, board.GetAdjacentLands(5))
-	require.Equal(t, []int{1, 5, 8}, board.GetAdjacentLands(6))
-	require.Equal(t, []int{5, 8}, board.GetAdjacentLands(7))
-	require.Equal(t, []int{5, 6, 7}, board.GetAdjacentLands(8))
+	expectedAdjacenciesOfLands := []set.Of[int]{
+		set.New(1, 2, 3),
+		set.New(0, 2, 4, 5, 6),
+		set.New(0, 1, 3, 4),
+		set.New(0, 2, 4),
+		set.New(1, 2, 3, 5),
+		set.New(1, 4, 6, 7, 8),
+		set.New(1, 5, 8),
+		set.New(5, 8),
+		set.New(5, 6, 7),
+	}
+
+	for idx, expectedAdjacenciesForLand := range expectedAdjacenciesOfLands {
+		actualAdjacencies := board.FilterLands(filter.IslandFilter{
+			SourceNumbers: set.New(idx),
+			MinRange:      1,
+			MaxRange:      1,
+		})
+		require.Equal(t, expectedAdjacenciesForLand, actualAdjacencies)
+	}
 }

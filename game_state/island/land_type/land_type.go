@@ -1,4 +1,4 @@
-package island
+package land_type
 
 //go:generate go run github.com/dmarkham/enumer -type=LandType
 type LandType int

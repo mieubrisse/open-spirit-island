@@ -7,6 +7,7 @@ import (
 	"github.com/mieubrisse/open-spirit-island/game_state"
 	"github.com/mieubrisse/open-spirit-island/game_state/invader_board"
 	"github.com/mieubrisse/open-spirit-island/game_state/island"
+	"github.com/mieubrisse/open-spirit-island/game_state/island/land_type"
 	"github.com/mieubrisse/open-spirit-island/game_state/player"
 	"github.com/mieubrisse/open-spirit-island/game_state/status"
 )
@@ -20,20 +21,20 @@ func main() {
 	// TODO parameterize this based on adversary
 	invaderDeck := []invader_deck.InvaderCard{
 		// stage 1
-		invader_deck.NewSingleTypeInvaderCard(island.Jungle),
-		invader_deck.NewSingleTypeInvaderCard(island.Desert),
-		invader_deck.NewSingleTypeInvaderCard(island.Wetlands),
+		invader_deck.NewSingleTypeInvaderCard(land_type.Jungle),
+		invader_deck.NewSingleTypeInvaderCard(land_type.Desert),
+		invader_deck.NewSingleTypeInvaderCard(land_type.Wetlands),
 		// stage 2
-		invader_deck.NewSingleTypeAndAdversaryInvaderCard(island.Mountain),
-		invader_deck.NewSingleTypeAndAdversaryInvaderCard(island.Wetlands),
-		invader_deck.NewSingleTypeAndAdversaryInvaderCard(island.Desert),
+		invader_deck.NewSingleTypeAndAdversaryInvaderCard(land_type.Mountain),
+		invader_deck.NewSingleTypeAndAdversaryInvaderCard(land_type.Wetlands),
+		invader_deck.NewSingleTypeAndAdversaryInvaderCard(land_type.Desert),
 		invader_deck.NewCoastalLandsInvaderCard(),
 		// stage 3
-		invader_deck.NewDoubleTypeInvaderCard(island.Mountain, island.Jungle),
-		invader_deck.NewDoubleTypeInvaderCard(island.Jungle, island.Wetlands),
-		invader_deck.NewDoubleTypeInvaderCard(island.Wetlands, island.Desert),
-		invader_deck.NewDoubleTypeInvaderCard(island.Mountain, island.Desert),
-		invader_deck.NewDoubleTypeInvaderCard(island.Jungle, island.Desert),
+		invader_deck.NewDoubleTypeInvaderCard(land_type.Mountain, land_type.Jungle),
+		invader_deck.NewDoubleTypeInvaderCard(land_type.Jungle, land_type.Wetlands),
+		invader_deck.NewDoubleTypeInvaderCard(land_type.Wetlands, land_type.Desert),
+		invader_deck.NewDoubleTypeInvaderCard(land_type.Mountain, land_type.Desert),
+		invader_deck.NewDoubleTypeInvaderCard(land_type.Jungle, land_type.Desert),
 		// invader_deck.NewDoubleTypeInvaderCard(island.Mountain, island.Wetlands),
 	}
 

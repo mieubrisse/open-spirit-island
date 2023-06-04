@@ -3,6 +3,7 @@ package game_state
 import (
 	"github.com/mieubrisse/open-spirit-island/game_state/invader_board"
 	"github.com/mieubrisse/open-spirit-island/game_state/island"
+	"github.com/mieubrisse/open-spirit-island/game_state/island/land_type"
 	"github.com/mieubrisse/open-spirit-island/game_state/player"
 	"github.com/mieubrisse/open-spirit-island/game_state/status"
 	"strings"
@@ -144,7 +145,7 @@ func (state GameState) Advance() GameState {
 
 			shouldExplorePredicates = append(
 				shouldExplorePredicates,
-				adjacentLand.LandType == island.Ocean,
+				adjacentLand.LandType == land_type.Ocean,
 				adjacentLand.NumCities > 0,
 				adjacentLand.NumTowns > 0,
 			)

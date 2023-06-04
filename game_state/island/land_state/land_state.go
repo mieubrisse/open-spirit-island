@@ -1,12 +1,13 @@
-package island
+package land_state
 
 import (
 	"fmt"
+	"github.com/mieubrisse/open-spirit-island/game_state/island/land_type"
 	"strings"
 )
 
 type LandState struct {
-	LandType LandType
+	LandType land_type.LandType
 
 	NumExplorers int
 	NumTowns     int

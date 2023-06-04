@@ -5,6 +5,9 @@ import (
 	"github.com/imdario/mergo"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
+	"github.com/mieubrisse/open-spirit-island/game_state/island/filter"
+	"github.com/mieubrisse/open-spirit-island/game_state/island/land_state"
+	"github.com/yourbasic/graph"
 	"sort"
 	"strconv"
 	"strings"
@@ -23,12 +26,14 @@ var columnConfigOverrides = []table.ColumnConfig{
 	{Name: "Land"},
 	{Name: "Type"},
 	{Name: "Adjacencies", Transformer: func(val interface{}) string {
-		adjacentLandIdxs := val.([]int)
-		adjacentLandIdxStrs := make([]string, len(adjacentLandIdxs))
-		for j, adjacentLandIdx := range adjacentLandIdxs {
-			adjacentLandIdxStrs[j] = strconv.Itoa(adjacentLandIdx)
+		adjacentLandsSet := val.(set.Of[int])
+		adjacentLandsIntList := adjacentLandsSet.Slice()
+		sort.Ints(adjacentLandsIntList)
+		adjacentLandsStrList := make([]string, len(adjacentLandsIntList))
+		for j, adjacentIndx := range adjacentLandsIntList {
+			adjacentLandsStrList[j] = strconv.Itoa(adjacentIndx)
 		}
-		return strings.Join(adjacentLandIdxStrs, ",")
+		return strings.Join(adjacentLandsStrList, ",")
 	}},
 	{Name: "Presence", Transformer: renderIntegerSkip0},
 	{Name: "Dahan", Transformer: renderIntegerSkip0},
@@ -40,11 +45,15 @@ var columnConfigOverrides = []table.ColumnConfig{
 
 // TODO separate boards
 type IslandBoardState struct {
-	// Same as the numbers on each board, with the ocean being 0
-	Lands []LandState
+	Graph *graph.Immutable
 
-	// Mapping of land_index -> bordering_land_indexes
-	Adjacencies [][]int
+	Lands []land_state.LandState
+
+	/*
+		// Mapping of land_index -> bordering_land_indexes
+		Adjacencies [][]int
+
+	*/
 }
 
 // TODO nice error-handling
@@ -53,65 +62,64 @@ func (state IslandBoardState) AddPresence(landIdx int) IslandBoardState {
 	return state
 }
 
-// Calculates distances from the source land to all other lands
-func (state IslandBoardState) CalculateDistances(source int) []int {
-	result := make([]int, len(state.Lands))
-	result[source] = 0
-
-	// Lands for whom we've calculated a distance
-	calculatedLands := map[int]bool{}
-	adjacencies := state.GetAdjacentLands(source)
-	for _, adjacency := range adjacencies {
-
-		result[adjacency] = 1
-	}
-
-	for len(calculatedLands) < len(state.Lands) {
-
-	}
-
-}
-
-// TODO finish this
-/*
-func (state IslandBoardState) GetMatchingLands(selector LandSelector) []int {
-	sourcesIdx := make([]int, 0)
+func (state IslandBoardState) FilterLands(filter filter.IslandFilter) set.Of[int] {
+	sourcesIdx := set.New[int]()
 	for idx, land := range state.Lands {
-		if _, found := selector.SourceLandTypes[land.LandType]; !found {
-			continue
+		if filter.SourceNumbers != nil {
+			if !filter.SourceNumbers.Has(idx) {
+				continue
+			}
 		}
 
-		if land.NumExplorers < selector.SourceExplorersMin {
-			continue
+		if filter.SourceFilter.Match(land) {
+			sourcesIdx.Add(idx)
 		}
-		if land.NumTowns < selector.SourceTownsMin {
-			continue
-		}
-		if land.NumCities < selector.SourceCitiesMin {
-			continue
-		}
-
-		if land.NumPresence < selector.SourcePresenceMin {
-			continue
-		}
-
-		sourcesIdx = append(sourcesIdx, idx)
 	}
 
-	result := make(map[int]bool, 0)
-	for _, sourceIdx := range sourcesIdx {
-		source
-		if selector.MinRange == 0
+	result := set.New[int]()
+	for sourceIdx := range sourcesIdx {
+		_, distancesInt64 := graph.ShortestPaths(state.Graph, sourceIdx)
+		distances := make([]int, len(distancesInt64))
+		for i, value := range distances {
+			distances[i] = value
+		}
 
+		for targetLandIdx, distance := range distances {
+			targetLand := state.Lands[targetLandIdx]
 
+			if distance < filter.MinRange {
+				continue
+			}
+
+			if distance > filter.MaxRange {
+				continue
+			}
+
+			if !filter.TargetFilter.Match(targetLand) {
+				continue
+			}
+
+			result.Add(targetLandIdx)
+		}
 	}
 
+	return result
 }
 
-*/
+// Gets the distances to all other lands from the given land
+func (state IslandBoardState) GetDistances(landIdx int) []int {
+	_, shortestPaths := graph.ShortestPaths(state.Graph, landIdx)
+	result := make([]int, len(shortestPaths))
+	for i, value := range shortestPaths {
+		result[i] = int(value)
+	}
+	return result
+}
 
+/*
 // Gets the indexes of the adjacent lands
 func (state IslandBoardState) GetAdjacentLands(landIdx int) set.Of[int] {
+
 	resultSet := set.New[int]()
 	for _, pair := range state.Adjacencies {
 		if pair[0] == landIdx {
@@ -131,6 +139,7 @@ func (state IslandBoardState) GetAdjacentLands(landIdx int) set.Of[int] {
 
 	return result
 }
+*/
 
 func (state IslandBoardState) String() string {
 	tableWriter := table.NewWriter()
@@ -153,7 +162,11 @@ func (state IslandBoardState) String() string {
 
 	rows := make([]table.Row, len(state.Lands))
 	for i, land := range state.Lands {
-		adjacentLandIdxs := state.GetAdjacentLands(i)
+		adjacentLandIdxs := state.FilterLands(filter.IslandFilter{
+			SourceNumbers: set.New(i),
+			MinRange:      1,
+			MaxRange:      1,
+		})
 
 		row := []interface{}{
 			i,

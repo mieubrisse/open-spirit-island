@@ -1,15 +1,18 @@
 package invader_deck
 
-import "github.com/mieubrisse/open-spirit-island/game_state/island"
+import (
+	"github.com/mieubrisse/open-spirit-island/game_state/island"
+	"github.com/mieubrisse/open-spirit-island/game_state/island/land_type"
+)
 
 // Vanilla game Stage 1 card selector
-func NewSingleTypeInvaderCard(landType island.LandType) InvaderCard {
-	if landType == island.Ocean {
-		panic("Cannot have an invader card for " + island.Ocean.String())
+func NewSingleTypeInvaderCard(landType land_type.LandType) InvaderCard {
+	if landType == land_type.Ocean {
+		panic("Cannot have an invader card for " + land_type.Ocean.String())
 	}
 
 	return InvaderCard{
-		TargetedLandSelector: getSelectorMatchingTypes(map[island.LandType]bool{
+		TargetedLandSelector: getSelectorMatchingTypes(map[land_type.LandType]bool{
 			landType: true,
 		}),
 		isAdversaryActionCard: false,
@@ -18,13 +21,13 @@ func NewSingleTypeInvaderCard(landType island.LandType) InvaderCard {
 }
 
 // Vanilla game Stage 2 card selector
-func NewSingleTypeAndAdversaryInvaderCard(landType island.LandType) InvaderCard {
-	if landType == island.Ocean {
-		panic("Cannot have an invader card for " + island.Ocean.String())
+func NewSingleTypeAndAdversaryInvaderCard(landType land_type.LandType) InvaderCard {
+	if landType == land_type.Ocean {
+		panic("Cannot have an invader card for " + land_type.Ocean.String())
 	}
 
 	return InvaderCard{
-		TargetedLandSelector: getSelectorMatchingTypes(map[island.LandType]bool{
+		TargetedLandSelector: getSelectorMatchingTypes(map[land_type.LandType]bool{
 			landType: true,
 		}),
 		isAdversaryActionCard: true,
@@ -44,9 +47,9 @@ func NewCoastalLandsInvaderCard() InvaderCard {
 }
 
 // Vanilla game Stage 3 land
-func NewDoubleTypeInvaderCard(type1 island.LandType, type2 island.LandType) InvaderCard {
+func NewDoubleTypeInvaderCard(type1 land_type.LandType, type2 land_type.LandType) InvaderCard {
 	return InvaderCard{
-		TargetedLandSelector: getSelectorMatchingTypes(map[island.LandType]bool{
+		TargetedLandSelector: getSelectorMatchingTypes(map[land_type.LandType]bool{
 			type1: true,
 			type2: true,
 		}),
@@ -61,7 +64,7 @@ func NewDoubleTypeInvaderCard(type1 island.LandType, type2 island.LandType) Inva
 //                                   Private Helper Functions
 // ====================================================================================================
 
-func getSelectorMatchingTypes(targetedTypes map[island.LandType]bool) LandSelector {
+func getSelectorMatchingTypes(targetedTypes map[land_type.LandType]bool) LandSelector {
 	return func(board island.IslandBoardState) []int {
 		result := make([]int, 0)
 		for idx, land := range board.Lands {
