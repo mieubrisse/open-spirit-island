@@ -1,16 +1,16 @@
-package invaders
+package invader_board
 
 import (
 	"fmt"
 	"github.com/mieubrisse/open-spirit-island/decks/fear"
-	"github.com/mieubrisse/open-spirit-island/decks/invader"
+	"github.com/mieubrisse/open-spirit-island/decks/invader_deck"
 	"math"
 	"strings"
 )
 
 type MaybeInvaderCard struct {
 	IsCardPresent bool
-	MaybeCard     invader.InvaderCard
+	MaybeCard     invader_deck.InvaderCard
 }
 
 type InvaderBoardState struct {
@@ -23,10 +23,12 @@ type InvaderBoardState struct {
 	UnearnedFearCards []fear.FearCard // New cards are popped from the first element
 	EarnedFearCards   []fear.FearCard // Processed from left to right
 
-	RemainingInvaderDeck []invader.InvaderCard
+	// TODO blight card & pool!!
+
+	RemainingInvaderDeck []invader_deck.InvaderCard
 	BuildSlot            MaybeInvaderCard
 	RavageSlot           MaybeInvaderCard
-	InvaderDeckDiscard   []invader.InvaderCard
+	InvaderDeckDiscard   []invader_deck.InvaderCard
 }
 
 func (state InvaderBoardState) AddFear(fear int) InvaderBoardState {
@@ -58,6 +60,20 @@ func (state InvaderBoardState) GetTerrorLevel() int {
 		}
 	}
 	return highestIdxReached + 1 // Because terror level is 1-indexed
+}
+
+func (state InvaderBoardState) AdvanceInvaderCards() InvaderBoardState {
+	if len(state.RemainingInvaderDeck) == 0 {
+		return state
+	}
+
+	state.RavageSlot = state.BuildSlot
+	state.BuildSlot = MaybeInvaderCard{
+		IsCardPresent: true,
+		MaybeCard:     state.RemainingInvaderDeck[0],
+	}
+	state.RemainingInvaderDeck = state.RemainingInvaderDeck[1:]
+	return state
 }
 
 func (state InvaderBoardState) String() string {

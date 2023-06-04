@@ -1,4 +1,4 @@
-package invaders
+package invader_board
 
 import (
 	"github.com/mieubrisse/open-spirit-island/decks/fear"
