@@ -1,8 +1,10 @@
 package invader_deck
 
 import (
-	"github.com/mieubrisse/open-spirit-island/game_state/island"
+	"github.com/bobg/go-generics/v2/set"
+	"github.com/mieubrisse/open-spirit-island/game_state/island/filter"
 	"github.com/mieubrisse/open-spirit-island/game_state/island/land_type"
+	"math"
 )
 
 // Vanilla game Stage 1 card selector
@@ -12,11 +14,9 @@ func NewSingleTypeInvaderCard(landType land_type.LandType) InvaderCard {
 	}
 
 	return InvaderCard{
-		TargetedLandSelector: getSelectorMatchingTypes(map[land_type.LandType]bool{
-			landType: true,
-		}),
-		isAdversaryActionCard: false,
-		humanReadableStr:      landType.String(),
+		TargetedLandSelector:  getInvaderFilterMatchingTypes(landType),
+		IsAdversaryActionCard: false,
+		HumanReadableStr:      landType.String(),
 	}
 }
 
@@ -27,34 +27,32 @@ func NewSingleTypeAndAdversaryInvaderCard(landType land_type.LandType) InvaderCa
 	}
 
 	return InvaderCard{
-		TargetedLandSelector: getSelectorMatchingTypes(map[land_type.LandType]bool{
-			landType: true,
-		}),
-		isAdversaryActionCard: true,
-		humanReadableStr:      landType.String() + "+Adversary",
+		TargetedLandSelector:  getInvaderFilterMatchingTypes(landType),
+		IsAdversaryActionCard: true,
+		HumanReadableStr:      landType.String() + "+Adversary",
 	}
 }
 
 func NewCoastalLandsInvaderCard() InvaderCard {
 	return InvaderCard{
-		TargetedLandSelector: func(board island.IslandBoardState) []int {
-			// 0 is always the ocean (little bit of forbidden knowledge though)
-			return board.GetAdjacentLands(0)
+		TargetedLandSelector: filter.IslandFilter{
+			SourceFilter: filter.LandFilter{
+				LandTypes: set.New(land_type.Ocean),
+			},
+			MinRange: 1,
+			MaxRange: 1,
 		},
-		isAdversaryActionCard: false,
-		humanReadableStr:      "Coastal Lands",
+		IsAdversaryActionCard: false,
+		HumanReadableStr:      "Coastal Lands",
 	}
 }
 
 // Vanilla game Stage 3 land
 func NewDoubleTypeInvaderCard(type1 land_type.LandType, type2 land_type.LandType) InvaderCard {
 	return InvaderCard{
-		TargetedLandSelector: getSelectorMatchingTypes(map[land_type.LandType]bool{
-			type1: true,
-			type2: true,
-		}),
-		isAdversaryActionCard: false,
-		humanReadableStr:      type1.String() + "+" + type2.String(),
+		TargetedLandSelector:  getInvaderFilterMatchingTypes(type1, type2),
+		IsAdversaryActionCard: false,
+		HumanReadableStr:      type1.String() + "+" + type2.String(),
 	}
 }
 
@@ -64,14 +62,16 @@ func NewDoubleTypeInvaderCard(type1 land_type.LandType, type2 land_type.LandType
 //                                   Private Helper Functions
 // ====================================================================================================
 
-func getSelectorMatchingTypes(targetedTypes map[land_type.LandType]bool) LandSelector {
-	return func(board island.IslandBoardState) []int {
-		result := make([]int, 0)
-		for idx, land := range board.Lands {
-			if _, found := targetedTypes[land.LandType]; found {
-				result = append(result, idx)
-			}
-		}
-		return result
+func getInvaderFilterMatchingTypes(targetedTypes ...land_type.LandType) filter.IslandFilter {
+	return filter.IslandFilter{
+		SourceFilter: filter.LandFilter{
+			// Technically not necessary, but means that we only need to calculate distance from one land, rather than all
+			LandTypes: set.New(land_type.Ocean),
+		},
+		MinRange: 1,
+		MaxRange: math.MaxInt,
+		TargetFilter: filter.LandFilter{
+			LandTypes: set.New(targetedTypes...),
+		},
 	}
 }

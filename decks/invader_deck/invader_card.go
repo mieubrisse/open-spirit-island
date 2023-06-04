@@ -1,23 +1,19 @@
 package invader_deck
 
-import "github.com/mieubrisse/open-spirit-island/game_state/island"
-
-type LandSelector func(board island.IslandBoardState) []int
+import "github.com/mieubrisse/open-spirit-island/game_state/island/filter"
 
 // Represents a generic invader card
 type InvaderCard struct {
 	// TODO add the invasion phase??
 
-	// Function for selecting targeted lands given an island board state
-	// Returns indices in sorted order
-	TargetedLandSelector LandSelector
+	TargetedLandSelector filter.IslandFilter
 
 	// True if it's an adversary action card
-	isAdversaryActionCard bool
+	IsAdversaryActionCard bool
 
-	humanReadableStr string
+	HumanReadableStr string
 }
 
 func (i InvaderCard) String() string {
-	return i.humanReadableStr
+	return i.HumanReadableStr
 }

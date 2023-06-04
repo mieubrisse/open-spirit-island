@@ -1,6 +1,7 @@
 package filter
 
 import (
+	"github.com/bobg/go-generics/v2/set"
 	"github.com/mieubrisse/open-spirit-island/game_state/island/land_state"
 	"github.com/mieubrisse/open-spirit-island/game_state/island/land_type"
 )
@@ -8,7 +9,7 @@ import (
 type LandFilter struct {
 	// Only lands matching these types will be considered as sources
 	// If this value is nil, then ALL land types will be allowed!
-	LandTypes map[land_type.LandType]bool
+	LandTypes set.Of[land_type.LandType]
 
 	InvadersMin int
 
@@ -26,7 +27,7 @@ type LandFilter struct {
 
 func (filter LandFilter) Match(land land_state.LandState) bool {
 	if filter.LandTypes != nil {
-		if _, found := filter.LandTypes[land.LandType]; !found {
+		if !filter.LandTypes.Has(land.LandType) {
 			return false
 		}
 	}
