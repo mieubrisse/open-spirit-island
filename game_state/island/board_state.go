@@ -52,6 +52,8 @@ func (state IslandBoardState) AddPresence(landIdx int) IslandBoardState {
 	return state
 }
 
+// TODO finish this
+/*
 func (state IslandBoardState) GetMatchingLands(selector LandSelector) []int {
 	sourcesIdx := make([]int, 0)
 	for idx, land := range state.Lands {
@@ -85,6 +87,8 @@ func (state IslandBoardState) GetMatchingLands(selector LandSelector) []int {
 	}
 
 }
+
+*/
 
 // Gets the indexes of the adjacent lands, returned in sorted order
 func (state IslandBoardState) GetAdjacentLands(landIdx int) []int {
