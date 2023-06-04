@@ -52,6 +52,40 @@ func (state IslandBoardState) AddPresence(landIdx int) IslandBoardState {
 	return state
 }
 
+func (state IslandBoardState) GetMatchingLands(selector LandSelector) []int {
+	sourcesIdx := make([]int, 0)
+	for idx, land := range state.Lands {
+		if _, found := selector.SourceLandTypes[land.LandType]; !found {
+			continue
+		}
+
+		if land.NumExplorers < selector.SourceExplorersMin {
+			continue
+		}
+		if land.NumTowns < selector.SourceTownsMin {
+			continue
+		}
+		if land.NumCities < selector.SourceCitiesMin {
+			continue
+		}
+
+		if land.NumPresence < selector.SourcePresenceMin {
+			continue
+		}
+
+		sourcesIdx = append(sourcesIdx, idx)
+	}
+
+	result := make(map[int]bool, 0)
+	for _, sourceIdx := range sourcesIdx {
+		source
+		if selector.MinRange == 0
+
+
+	}
+
+}
+
 // Gets the indexes of the adjacent lands, returned in sorted order
 func (state IslandBoardState) GetAdjacentLands(landIdx int) []int {
 	resultSet := map[int]bool{}
