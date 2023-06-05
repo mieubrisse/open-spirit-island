@@ -20,7 +20,7 @@ func GetUserSelection(prompt string, options []string) int {
 		reader := bufio.NewReader(os.Stdin)
 		line, err := reader.ReadString('\n')
 		if err != nil {
-			panic("Got an error when reading user input")
+			panic("Got an error when reading user input: " + err.Error())
 		}
 
 		selection, err := strconv.Atoi(line)

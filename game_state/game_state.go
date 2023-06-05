@@ -10,6 +10,7 @@ import (
 	"github.com/mieubrisse/open-spirit-island/game_state/player"
 	"github.com/mieubrisse/open-spirit-island/game_state/status"
 	"github.com/mieubrisse/open-spirit-island/input"
+	"github.com/mieubrisse/open-spirit-island/utils"
 	"sort"
 	"strings"
 )
@@ -129,27 +130,25 @@ func (state GameState) RunInvaderPhase() GameState {
 
 			// TODO ravage skips
 
-			// Battle
 			invaderDamage := ravageLand.NumExplorers + 2*ravageLand.NumTowns + 3*ravageLand.NumCities
+
+			// Dahan are attacked
 			dahanToRemove := invaderDamage / 2
-			remainingDahan := ravageLand.NumDahan - dahanToRemove
-			if remainingDahan < 0 {
-				remainingDahan = 0
-			}
-			state.BoardState.Lands[landIdx].NumDahan = remainingDahan
+			ravageLand.NumDahan = utils.GetMaxInt(ravageLand.NumDahan-dahanToRemove, 0)
+			state.BoardState.Lands[landIdx] = ravageLand
 
 			// TODO Dahan strike back
 
 			// TODO defend
 
-			damageDealt := ravageLand.NumCities*3 + ravageLand.NumTowns*2 + ravageLand.NumExplorers
-			if damageDealt >= 2 {
+			if invaderDamage >= 2 {
 
 				mustSpreadBlight := false
 				if ravageLand.NumBlight > 0 {
 					mustSpreadBlight = true
 				}
 				ravageLand.NumBlight++
+				ravageLand.NumPresence = utils.GetMaxInt(ravageLand.NumPresence-1, 0)
 				state.BoardState.Lands[landIdx] = ravageLand
 
 				sourceLandIdx := landIdx
@@ -182,7 +181,9 @@ func (state GameState) RunInvaderPhase() GameState {
 						mustSpreadBlight = false
 					}
 
-					state.BoardState.Lands[selectedLandIdx].NumBlight++
+					sourceLand.NumBlight++
+					sourceLand.NumPresence = utils.GetMaxInt(sourceLand.NumPresence-1, 0)
+					state.BoardState.Lands[selectedLandIdx] = sourceLand
 					sourceLandIdx = selectedLandIdx
 				}
 
@@ -248,8 +249,4 @@ func (state GameState) RunInvaderPhase() GameState {
 	state.InvaderState = state.InvaderState.AdvanceInvaderCards()
 
 	return state
-}
-
-func (state GameState) BlightLand(idx int) GameState {
-
 }
