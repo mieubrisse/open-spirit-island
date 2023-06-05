@@ -167,13 +167,14 @@ func (state GameState) RunInvaderPhase() GameState {
 					optionStrs := make([]string, len(adjacentLandIdxs))
 					for i, adjacentIdx := range adjacentLandIdxs {
 						adjacentLand := state.BoardState.Lands[adjacentIdx]
-						optionStrs[i] = fmt.Sprintf("%s #%d (%d Blight)", adjacentLand.LandType, adjacentIdx, adjacentLand.NumBlight)
+						optionStrs[i] = fmt.Sprintf("%s #%d (%d Blight, %d Presence)", adjacentLand.LandType, adjacentIdx, adjacentLand.NumBlight, adjacentLand.NumPresence)
 					}
 
-					selectedLandIdx := input.GetUserSelection(
+					selection := input.GetUserSelection(
 						fmt.Sprintf("%s #%d is suffering a Blight cascade; select an adjacent land to spread Blight to:", sourceLand.LandType, sourceLandIdx),
 						optionStrs,
 					)
+					selectedLandIdx := adjacentLandIdxs[selection]
 
 					selectedLand := state.BoardState.Lands[selectedLandIdx]
 
@@ -181,9 +182,9 @@ func (state GameState) RunInvaderPhase() GameState {
 						mustSpreadBlight = false
 					}
 
-					sourceLand.NumBlight++
-					sourceLand.NumPresence = utils.GetMaxInt(sourceLand.NumPresence-1, 0)
-					state.BoardState.Lands[selectedLandIdx] = sourceLand
+					selectedLand.NumBlight++
+					selectedLand.NumPresence = utils.GetMaxInt(selectedLand.NumPresence-1, 0)
+					state.BoardState.Lands[selectedLandIdx] = selectedLand
 					sourceLandIdx = selectedLandIdx
 				}
 
