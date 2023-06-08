@@ -5,6 +5,7 @@ import (
 	"github.com/imdario/mergo"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
+	"github.com/mieubrisse/open-spirit-island/game_state/decks/blighted_island"
 	"github.com/mieubrisse/open-spirit-island/game_state/decks/fear"
 	"github.com/mieubrisse/open-spirit-island/game_state/decks/invader_deck"
 	"math"
@@ -43,6 +44,10 @@ type InvaderBoardState struct {
 	EarnedFearCards   []fear.FearCard // Processed from left to right
 
 	// TODO blight card & pool!!
+
+	BlightedIslandCard blighted_island.BlightedIslandCard
+	IsBlightedIsland   bool
+	BlightPool         int
 
 	RemainingInvaderDeck []invader_deck.InvaderCard
 	BuildSlot            MaybeInvaderCard
@@ -125,7 +130,7 @@ func (state InvaderBoardState) String() string {
 			"EARNED",
 			len(state.EarnedFearCards),
 			state.EarnedFear,
-			state.GetTerrorLevel(),
+			fmt.Sprintf("Current: %d", state.GetTerrorLevel()),
 		},
 	})
 
@@ -145,20 +150,31 @@ func (state InvaderBoardState) String() string {
 		ravageLineContent = state.RavageSlot.MaybeCard.String()
 	}
 
+	islandStatus := "Healthy"
+	if state.IsBlightedIsland {
+		islandStatus = "BLIGHTED"
+	}
+	blightedIslandLine := fmt.Sprintf(
+		"                           Blight Pool: %d     Island: %v",
+		state.BlightPool,
+		islandStatus,
+	)
+
 	buildLineContent := "<none>"
 	if state.BuildSlot.IsCardPresent {
 		buildLineContent = state.BuildSlot.MaybeCard.String()
 	}
 	invasionLine := fmt.Sprintf(
-		"Ravage(%s) <- Build(%s) <- Deck(%d)",
+		"     Ravage(%s) <- Build(%s) <- Deck(%d)",
 		ravageLineContent,
 		buildLineContent,
 		len(state.RemainingInvaderDeck),
 	)
 
 	lines := []string{
-		fearTable,
 		invasionLine,
+		fearTable,
+		blightedIslandLine,
 	}
 
 	return strings.Join(lines, "\n")

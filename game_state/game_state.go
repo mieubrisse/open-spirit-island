@@ -67,7 +67,9 @@ func (state GameState) GetStatus() status.GameStatus {
 	}
 
 	// Blight loss
-	// TODO
+	if state.InvaderState.BlightPool == 0 {
+		return status.Defeat
+	}
 
 	// Invader deck loss
 	if len(state.InvaderState.RemainingInvaderDeck) == 0 {
@@ -142,56 +144,14 @@ func (state GameState) RunInvaderPhase() GameState {
 			// TODO defend
 
 			if invaderDamage >= 2 {
-
-				mustSpreadBlight := false
-				if ravageLand.NumBlight > 0 {
-					mustSpreadBlight = true
-				}
-				ravageLand.NumBlight++
-				ravageLand.NumPresence = utils.GetMaxInt(ravageLand.NumPresence-1, 0)
-				state.BoardState.Lands[landIdx] = ravageLand
-
-				sourceLandIdx := landIdx
-				for mustSpreadBlight {
-					sourceLand := state.BoardState.Lands[sourceLandIdx]
-
-					adjacentLandIdxsSet := state.BoardState.FilterLands(filter.IslandFilter{
-						SourceNumbers: set.New(sourceLandIdx),
-						MinRange:      1,
-						MaxRange:      1,
-						TargetFilter:  filter.LandFilter{LandTypes: land_type.NonOceanLandTypes},
-					})
-					adjacentLandIdxs := adjacentLandIdxsSet.Slice()
-					sort.Ints(adjacentLandIdxs)
-
-					optionStrs := make([]string, len(adjacentLandIdxs))
-					for i, adjacentIdx := range adjacentLandIdxs {
-						adjacentLand := state.BoardState.Lands[adjacentIdx]
-						optionStrs[i] = fmt.Sprintf("%s #%d (%d Blight, %d Presence)", adjacentLand.LandType, adjacentIdx, adjacentLand.NumBlight, adjacentLand.NumPresence)
-					}
-
-					selection := input.GetUserSelection(
-						fmt.Sprintf("%s #%d is suffering a Blight cascade; select an adjacent land to spread Blight to:", sourceLand.LandType, sourceLandIdx),
-						optionStrs,
-					)
-					selectedLandIdx := adjacentLandIdxs[selection]
-
-					selectedLand := state.BoardState.Lands[selectedLandIdx]
-
-					if selectedLand.NumBlight == 0 {
-						mustSpreadBlight = false
-					}
-
-					selectedLand.NumBlight++
-					selectedLand.NumPresence = utils.GetMaxInt(selectedLand.NumPresence-1, 0)
-					state.BoardState.Lands[selectedLandIdx] = selectedLand
-					sourceLandIdx = selectedLandIdx
-				}
-
+				state = state.blightLandWithCascade(landIdx)
 			}
-
-			// TODO presence token destroy mechanics
 		}
+	}
+
+	// Loss condition check (possible due to Blight allocation)
+	if state.GetStatus() != status.Undecided {
+		return state
 	}
 
 	// Build
@@ -250,4 +210,73 @@ func (state GameState) RunInvaderPhase() GameState {
 	state.InvaderState = state.InvaderState.AdvanceInvaderCards()
 
 	return state
+}
+
+// ====================================================================================================
+//                                   Private Helper Functions
+// ====================================================================================================
+
+func (state GameState) blightLandWithCascade(landIdx int) GameState {
+	var shouldBlightCascade bool
+	state, shouldBlightCascade = state.blightSingleLand(landIdx)
+
+	sourceLandIdx := landIdx
+	for shouldBlightCascade {
+		sourceLand := state.BoardState.Lands[sourceLandIdx]
+
+		adjacentLandIdxsSet := state.BoardState.FilterLands(filter.IslandFilter{
+			SourceNumbers: set.New(sourceLandIdx),
+			MinRange:      1,
+			MaxRange:      1,
+			TargetFilter:  filter.LandFilter{LandTypes: land_type.NonOceanLandTypes},
+		})
+		adjacentLandIdxs := adjacentLandIdxsSet.Slice()
+		sort.Ints(adjacentLandIdxs)
+
+		optionStrs := make([]string, len(adjacentLandIdxs))
+		for i, adjacentIdx := range adjacentLandIdxs {
+			adjacentLand := state.BoardState.Lands[adjacentIdx]
+			optionStrs[i] = fmt.Sprintf("%s #%d (%d Blight, %d Presence)", adjacentLand.LandType, adjacentIdx, adjacentLand.NumBlight, adjacentLand.NumPresence)
+		}
+
+		selection := input.GetUserSelection(
+			fmt.Sprintf("%s #%d is suffering a Blight cascade; select an adjacent land to spread Blight to:", sourceLand.LandType, sourceLandIdx),
+			optionStrs,
+		)
+		selectedLandIdx := adjacentLandIdxs[selection]
+
+		state, shouldBlightCascade = state.blightSingleLand(selectedLandIdx)
+
+		sourceLandIdx = selectedLandIdx
+	}
+	return state
+}
+
+func (state GameState) blightSingleLand(landIdx int) (GameState, bool) {
+	if state.InvaderState.BlightPool == 0 {
+		return state, false
+	}
+
+	land := state.BoardState.Lands[landIdx]
+
+	shouldBlightCascade := false
+	if land.NumBlight > 0 {
+		shouldBlightCascade = true
+	}
+	land.NumBlight++
+	land.NumPresence = utils.GetMaxInt(land.NumPresence-1, 0)
+	state.BoardState.Lands[landIdx] = land
+	state.InvaderState.BlightPool--
+
+	if !state.InvaderState.IsBlightedIsland {
+		state.InvaderState.IsBlightedIsland = true
+		state.InvaderState.BlightPool = state.InvaderState.BlightedIslandCard.BlightPerPlayer
+	}
+
+	// Optimization: if there's no more Blight after allocating, don't Blight cascade (it's not possible)
+	if state.InvaderState.BlightPool == 0 {
+		shouldBlightCascade = false
+	}
+
+	return state, shouldBlightCascade
 }
