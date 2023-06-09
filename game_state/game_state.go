@@ -137,15 +137,24 @@ func (state GameState) RunInvaderPhase() GameState {
 			// Dahan are attacked
 			// From the rules, Dahan must be destroyed as efficiently as possible
 			ravageLand.DahanHealth = efficientlyDamageDahan(ravageLand.DahanHealth, invaderDamage)
-			state.BoardState.Lands[landIdx] = ravageLand
 
-			// TODO Dahan strike back
+			// Dahan strike back
+			dahanDamage := island.DahanBaseDamage * len(ravageLand.DahanHealth)
+			ravageLand.CityHealth, ravageLand.TownHealth, ravageLand.ExplorerHealth = input.DamageInvaders(
+				"Dahan",
+				ravageLand.CityHealth,
+				ravageLand.TownHealth,
+				ravageLand.ExplorerHealth,
+				dahanDamage,
+			)
 
 			// TODO defend
 
 			if invaderDamage >= 2 {
 				state = state.blightLandWithCascade(landIdx)
 			}
+
+			state.BoardState.Lands[landIdx] = ravageLand
 		}
 	}
 
@@ -241,7 +250,7 @@ func (state GameState) blightLandWithCascade(landIdx int) GameState {
 			optionStrs[i] = fmt.Sprintf("%s #%d (%d Blight, %d Presence)", adjacentLand.LandType, adjacentIdx, adjacentLand.NumBlight, adjacentLand.NumPresence)
 		}
 
-		selection := input.GetUserSelection(
+		selection := input.GetSelectionFromOptions(
 			fmt.Sprintf("%s #%d is suffering a Blight cascade; select an adjacent land to spread Blight to:", sourceLand.LandType, sourceLandIdx),
 			optionStrs,
 		)
