@@ -1,6 +1,7 @@
 package island
 
 import (
+	"fmt"
 	"github.com/bobg/go-generics/v2/set"
 	"github.com/imdario/mergo"
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -11,6 +12,21 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+)
+
+// TODO one day make these customizable?
+const (
+	DahanBaseHealth = 2
+	DahanBaseDamage = 2
+
+	CityBaseHealth = 3
+	CityBaseDamage = 3
+
+	TownBaseHealth = 2
+	TownBaseDamage = 2
+
+	ExplorerBaseHealth = 1
+	ExplorerBaseDamage = 1
 )
 
 // The base column config, on which the overrides will be applied
@@ -36,10 +52,9 @@ var columnConfigOverrides = []table.ColumnConfig{
 		return strings.Join(adjacentLandsStrList, ",")
 	}},
 	{Name: "Presence", Transformer: renderIntegerSkip0},
-	{Name: "Dahan", Transformer: renderIntegerSkip0},
-	{Name: "Explorers", Transformer: renderIntegerSkip0},
-	{Name: "Towns", Transformer: renderIntegerSkip0},
-	{Name: "Cities", Transformer: renderIntegerSkip0},
+	{Name: "Dahan"},
+	{Name: "Invaders"},
+	{Name: "Invader Damage", Transformer: renderIntegerSkip0},
 	{Name: "Blight", Transformer: renderIntegerSkip0},
 }
 
@@ -126,7 +141,6 @@ func (state IslandBoardState) String() string {
 	}
 	tableWriter.AppendHeader(headerRow)
 
-	rows := make([]table.Row, len(state.Lands))
 	for i, land := range state.Lands {
 		adjacentLandIdxs := state.FilterLands(filter.IslandFilter{
 			SourceNumbers: set.New(i),
@@ -134,21 +148,34 @@ func (state IslandBoardState) String() string {
 			MaxRange:      1,
 		})
 
+		dahanStrs := renderObjects("Dahan", land.DahanHealth, DahanBaseHealth)
+		dahanCell := strings.Join(dahanStrs, "\n")
+
+		invaderStrs := make([]string, 0, len(land.CityHealth)+len(land.TownHealth)+len(land.ExplorerHealth))
+		invaderStrs = append(invaderStrs, renderObjects("City", land.CityHealth, CityBaseHealth)...)
+		invaderStrs = append(invaderStrs, renderObjects("Town", land.TownHealth, TownBaseHealth)...)
+		invaderStrs = append(invaderStrs, renderObjects("Explorer", land.ExplorerHealth, ExplorerBaseHealth)...)
+		invaderCell := strings.Join(invaderStrs, "\n")
+
+		invaderDamage := CityBaseDamage*len(land.CityHealth) + TownBaseDamage*len(land.TownHealth) + ExplorerBaseDamage*len(land.ExplorerHealth)
+
 		row := []interface{}{
 			i,
 			land.LandType,
 			adjacentLandIdxs,
 			land.NumPresence,
-			land.NumDahan,
-			land.NumExplorers,
-			land.NumTowns,
-			land.NumCities,
+			dahanCell,
+			invaderCell,
+			// TODO account for defense
+			invaderDamage,
 			land.NumBlight,
 		}
 
-		rows = append(rows, row)
+		tableWriter.AppendRow(row)
+		if i < len(state.Lands)-1 {
+			tableWriter.AppendSeparator()
+		}
 	}
-	tableWriter.AppendRows(rows)
 
 	return tableWriter.Render()
 }
@@ -159,4 +186,12 @@ func renderIntegerSkip0(val interface{}) string {
 		return ""
 	}
 	return strconv.Itoa(casted)
+}
+
+func renderObjects(objectTitle string, allObjectsHealth []int, baseObjectHealth int) []string {
+	result := make([]string, len(allObjectsHealth))
+	for i, health := range allObjectsHealth {
+		result[i] = fmt.Sprintf("%s (%d/%d)", objectTitle, health, baseObjectHealth)
+	}
+	return result
 }

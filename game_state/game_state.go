@@ -39,9 +39,9 @@ func (state GameState) GetStatus() status.GameStatus {
 	numCities := 0
 	numPresence := 0
 	for _, land := range state.BoardState.Lands {
-		numExplorers += land.NumExplorers
-		numTowns += land.NumTowns
-		numCities += land.NumCities
+		numExplorers += len(land.ExplorerHealth)
+		numTowns += len(land.TownHealth)
+		numCities += len(land.CityHealth)
 		numPresence += land.NumPresence
 	}
 
@@ -132,11 +132,11 @@ func (state GameState) RunInvaderPhase() GameState {
 
 			// TODO ravage skips
 
-			invaderDamage := ravageLand.NumExplorers + 2*ravageLand.NumTowns + 3*ravageLand.NumCities
+			invaderDamage := island.ExplorerBaseDamage*len(ravageLand.ExplorerHealth) + island.TownBaseDamage*len(ravageLand.TownHealth) + island.CityBaseDamage*len(ravageLand.CityHealth)
 
 			// Dahan are attacked
-			dahanToRemove := invaderDamage / 2
-			ravageLand.NumDahan = utils.GetMaxInt(ravageLand.NumDahan-dahanToRemove, 0)
+			// From the rules, Dahan must be destroyed as efficiently as possible
+			ravageLand.DahanHealth = efficientlyDamageDahan(ravageLand.DahanHealth, invaderDamage)
 			state.BoardState.Lands[landIdx] = ravageLand
 
 			// TODO Dahan strike back
@@ -164,10 +164,10 @@ func (state GameState) RunInvaderPhase() GameState {
 			buildLand := state.BoardState.Lands[landIdx]
 			// TODO build skips
 
-			if buildLand.NumTowns > buildLand.NumCities {
-				buildLand.NumCities++
+			if len(buildLand.TownHealth) > len(buildLand.CityHealth) {
+				buildLand.CityHealth = append(buildLand.CityHealth, island.CityBaseHealth)
 			} else {
-				buildLand.NumTowns++
+				buildLand.TownHealth = append(buildLand.TownHealth, island.TownBaseHealth)
 			}
 			state.BoardState.Lands[landIdx] = buildLand
 		}
@@ -203,7 +203,9 @@ func (state GameState) RunInvaderPhase() GameState {
 	toExploreLandIdxs := set.Intersect(explorableLandIdx, desiredExploreLandIdxs)
 
 	for landIdx := range toExploreLandIdxs {
-		state.BoardState.Lands[landIdx].NumExplorers++
+		exploreLand := state.BoardState.Lands[landIdx]
+		exploreLand.ExplorerHealth = append(exploreLand.ExplorerHealth, island.ExplorerBaseHealth)
+		state.BoardState.Lands[landIdx] = exploreLand
 	}
 
 	// Advance invader slots
@@ -279,4 +281,38 @@ func (state GameState) blightSingleLand(landIdx int) (GameState, bool) {
 	}
 
 	return state, shouldBlightCascade
+}
+
+func efficientlyDamageDahan(currentDahanHp []int, damageToDistribute int) []int {
+	var workingCopy []int
+
+	if len(currentDahanHp) == 0 {
+		return workingCopy
+	}
+
+	workingCopy = make([]int, len(currentDahanHp))
+	copy(workingCopy, currentDahanHp)
+
+	// To efficiently distribute damage, we hunt the weakest Dahan first (always using the
+	// least amount of damage to gain kills)
+	dahanHealthToTarget := 1
+	for damageToDistribute > 0 {
+		for i, dahanHp := range workingCopy {
+			if dahanHp == dahanHealthToTarget {
+				damageConsumed := utils.GetMintInt(dahanHp, damageToDistribute)
+				workingCopy[i] -= damageConsumed
+				damageToDistribute -= damageConsumed
+			}
+		}
+		dahanHealthToTarget++ // Now hunt the next-strongest Dahan
+	}
+
+	var result []int
+	for _, hp := range workingCopy {
+		if hp > 0 {
+			result = append(result, hp)
+		}
+	}
+
+	return result
 }

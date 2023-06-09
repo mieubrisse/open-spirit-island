@@ -19,14 +19,14 @@ func NewBoardA() IslandBoardState {
 		},
 		// 2
 		{
-			LandType:  land_type.Wetlands,
-			NumCities: 1,
-			NumDahan:  1,
+			LandType:    land_type.Wetlands,
+			CityHealth:  []int{CityBaseHealth},
+			DahanHealth: []int{DahanBaseHealth},
 		},
 		// 3
 		{
-			LandType: land_type.Jungle,
-			NumDahan: 2,
+			LandType:    land_type.Jungle,
+			DahanHealth: []int{DahanBaseHealth, DahanBaseHealth},
 		},
 		// 4
 		{
@@ -39,18 +39,18 @@ func NewBoardA() IslandBoardState {
 		},
 		// 6
 		{
-			LandType: land_type.Mountain,
-			NumDahan: 1,
+			LandType:    land_type.Mountain,
+			DahanHealth: []int{DahanBaseHealth},
 		},
 		// 7
 		{
-			LandType: land_type.Desert,
-			NumDahan: 2,
+			LandType:    land_type.Desert,
+			DahanHealth: []int{DahanBaseHealth, DahanBaseHealth},
 		},
 		// 8
 		{
-			LandType: land_type.Jungle,
-			NumTowns: 1,
+			LandType:   land_type.Jungle,
+			TownHealth: []int{TownBaseHealth},
 		},
 	}
 
