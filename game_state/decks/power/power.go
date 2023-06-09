@@ -1,7 +1,10 @@
 package power
 
-import "github.com/mieubrisse/open-spirit-island/game_state"
+import "github.com/bobg/go-generics/v2/set"
 
-type Power interface {
-	Play(state game_state.GameState) game_state.GameState
+type PowerCardID int
+type PowerCard struct {
+	Title string
+
+	Elements set.Of[Element]
 }

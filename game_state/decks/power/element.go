@@ -1,4 +1,4 @@
-package elements
+package power
 
 type Element int
 

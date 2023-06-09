@@ -2,13 +2,19 @@ package player
 
 import (
 	"fmt"
+	"github.com/bobg/go-generics/v2/set"
+	"github.com/mieubrisse/open-spirit-island/game_state/decks/power"
 	"strings"
 )
 
 type PlayerState struct {
 	Energy int
 
-	// SpiritBoardState SpiritBoardState
+	Hand set.Of[power.PowerCardID]
+
+	Played set.Of[power.PowerCardID]
+
+	Discard set.Of[power.PowerCardID]
 
 	// TODO hand
 	// TODO cards played

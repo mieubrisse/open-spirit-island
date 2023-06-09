@@ -17,6 +17,7 @@ func main() {
 	for gameState.GetStatus() == status.Undecided {
 		fmt.Scanln()
 		fmt.Println("\n\n\n")
+		gameState = gameState.RunGrowthPhase()
 		gameState = gameState.RunInvaderPhase()
 		fmt.Println(gameState.String())
 	}

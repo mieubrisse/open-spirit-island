@@ -16,6 +16,7 @@ import (
 )
 
 type GameState struct {
+	Phase
 	/*
 		MajorPowersDeck    []power.Power
 		MajorPowersDiscord []power.Power
@@ -104,6 +105,19 @@ func (state GameState) String() string {
 }
 
 // TODO get the score
+
+func (state GameState) RunGrowthPhase() GameState {
+	// Can't change the game state beyond victory or defeat
+	if state.GetStatus() != status.Undecided {
+		return state
+	}
+
+	// TODO growth choice
+
+	// TODO elemental income
+
+	// TODO play & pay power cards
+}
 
 // Runs the invasion phase
 func (state GameState) RunInvaderPhase() GameState {
