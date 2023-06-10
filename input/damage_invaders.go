@@ -9,55 +9,6 @@ import (
 	"strings"
 )
 
-const (
-	alphabeticalEncodingChars string = "abcdefghijklmnopqrstuvwxyz"
-)
-
-var encodingCharOrdinals map[string]int
-
-func init() {
-	encodingCharOrdinals = make(map[string]int, len(alphabeticalEncodingChars))
-	for i, char := range alphabeticalEncodingChars {
-		encodingCharOrdinals[string(char)] = i
-	}
-}
-
-func GetSelectionFromOptions(prompt string, options []string) int {
-	fmt.Println(prompt)
-	for idx, option := range options {
-		fmt.Println(fmt.Sprintf(" %s) %s", base26Encode(idx), option))
-	}
-
-	// TODO handle this error!
-
-	for {
-		fmt.Print("Select: ")
-		reader := bufio.NewReader(os.Stdin)
-		// TODO handle isPrefix case?
-		line, _, err := reader.ReadLine()
-		if err != nil {
-			panic("Got an error when reading user input: " + err.Error())
-		}
-
-		selection, err := base26Decode(string(line))
-		if err != nil {
-			fmt.Println("Unrecognized selection string")
-			continue
-		}
-
-		if selection < 0 || selection >= len(options) {
-			fmt.Println(fmt.Sprintf(
-				"Selection must be %s-%s",
-				base26Encode(0),
-				base26Encode(len(options)-1),
-			))
-			continue
-		}
-
-		return selection
-	}
-}
-
 // Allocates damage to the invaders
 func DamageInvaders(
 	actorDescription string,
@@ -249,18 +200,4 @@ allocationLoop:
 	}
 
 	return resultCityHp, resultTownHp, resultExplorerHp
-}
-
-// Converts a decimal string to a letter (base 26)
-func base26Encode(number int) string {
-	// Mayyyyybe we'll need to support > 26 choices, but I doubt it - can always support those in the future if we need
-	return string(alphabeticalEncodingChars[number])
-}
-
-func base26Decode(str string) (int, error) {
-	decimal, found := encodingCharOrdinals[str]
-	if !found {
-		return 0, fmt.Errorf("invalid string '%v'", str)
-	}
-	return decimal, nil
 }
