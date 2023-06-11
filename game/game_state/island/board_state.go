@@ -51,7 +51,7 @@ var columnConfigOverrides = []table.ColumnConfig{
 		}
 		return strings.Join(adjacentLandsStrList, ",")
 	}},
-	{Name: "Presence", Transformer: renderIntegerSkip0},
+	{Name: "🪔", Transformer: renderIntegerSkip0},
 	{Name: "Dahan"},
 	{Name: "Invaders"},
 	{Name: "Invader Damage", Transformer: renderIntegerSkip0},

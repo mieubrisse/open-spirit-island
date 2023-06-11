@@ -23,7 +23,7 @@ type PlayerState struct {
 
 func (state PlayerState) String() string {
 	lines := []string{
-		fmt.Sprintf("Energy: %d", state.Energy),
+		fmt.Sprintf("⚡ %d", state.Energy),
 	}
 	return strings.Join(lines, "\n")
 }
