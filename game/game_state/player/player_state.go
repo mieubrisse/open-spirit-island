@@ -3,7 +3,7 @@ package player
 import (
 	"fmt"
 	"github.com/bobg/go-generics/v2/set"
-	"github.com/mieubrisse/open-spirit-island/game_state/decks/power"
+	"github.com/mieubrisse/open-spirit-island/game/game_state/decks/power"
 	"strings"
 )
 

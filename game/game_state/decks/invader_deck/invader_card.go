@@ -1,6 +1,8 @@
 package invader_deck
 
-import "github.com/mieubrisse/open-spirit-island/game_state/island/filter"
+import (
+	"github.com/mieubrisse/open-spirit-island/game/game_state/island/filter"
+)
 
 // Represents a generic invader card
 type InvaderCard struct {

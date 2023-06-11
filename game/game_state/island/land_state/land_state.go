@@ -1,7 +1,7 @@
 package land_state
 
 import (
-	"github.com/mieubrisse/open-spirit-island/game_state/island/land_type"
+	"github.com/mieubrisse/open-spirit-island/game/game_state/island/land_type"
 )
 
 type LandState struct {

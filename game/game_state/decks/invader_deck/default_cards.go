@@ -2,8 +2,8 @@ package invader_deck
 
 import (
 	"github.com/bobg/go-generics/v2/set"
-	"github.com/mieubrisse/open-spirit-island/game_state/island/filter"
-	"github.com/mieubrisse/open-spirit-island/game_state/island/land_type"
+	filter2 "github.com/mieubrisse/open-spirit-island/game/game_state/island/filter"
+	"github.com/mieubrisse/open-spirit-island/game/game_state/island/land_type"
 	"math"
 )
 
@@ -35,7 +35,7 @@ func NewSingleTypeAndAdversaryInvaderCard(landType land_type.LandType) InvaderCa
 
 func NewCoastalLandsInvaderCard() InvaderCard {
 	return InvaderCard{
-		TargetedLandSelector:  filter.NewCoastalLandsFilter(),
+		TargetedLandSelector:  filter2.NewCoastalLandsFilter(),
 		IsAdversaryActionCard: false,
 		HumanReadableStr:      "Coastal Lands",
 	}
@@ -56,15 +56,15 @@ func NewDoubleTypeInvaderCard(type1 land_type.LandType, type2 land_type.LandType
 //                                   Private Helper Functions
 // ====================================================================================================
 
-func getInvaderFilterMatchingTypes(targetedTypes ...land_type.LandType) filter.IslandFilter {
-	return filter.IslandFilter{
-		SourceFilter: filter.LandFilter{
+func getInvaderFilterMatchingTypes(targetedTypes ...land_type.LandType) filter2.IslandFilter {
+	return filter2.IslandFilter{
+		SourceFilter: filter2.LandFilter{
 			// Technically not necessary, but means that we only need to calculate distance from one land, rather than all
 			LandTypes: set.New(land_type.Ocean),
 		},
 		MinRange: 1,
 		MaxRange: math.MaxInt,
-		TargetFilter: filter.LandFilter{
+		TargetFilter: filter2.LandFilter{
 			LandTypes: set.New(targetedTypes...),
 		},
 	}

@@ -2,7 +2,7 @@ package island
 
 import (
 	"github.com/bobg/go-generics/v2/set"
-	"github.com/mieubrisse/open-spirit-island/game_state/island/filter"
+	filter2 "github.com/mieubrisse/open-spirit-island/game/game_state/island/filter"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -23,7 +23,7 @@ func TestIslandBoardState_GetMatchingLands_AdjacentLands(t *testing.T) {
 	}
 
 	for idx, expectedAdjacenciesForLand := range expectedAdjacenciesOfLands {
-		actualAdjacencies := board.FilterLands(filter.IslandFilter{
+		actualAdjacencies := board.FilterLands(filter2.IslandFilter{
 			SourceNumbers: set.New(idx),
 			MinRange:      1,
 			MaxRange:      1,
@@ -35,6 +35,6 @@ func TestIslandBoardState_GetMatchingLands_AdjacentLands(t *testing.T) {
 func TestIslandBoardState_GetMatchingLands_CoastalLands(t *testing.T) {
 	board := NewBoardA()
 
-	actualCoastalLands := board.FilterLands(filter.NewCoastalLandsFilter())
+	actualCoastalLands := board.FilterLands(filter2.NewCoastalLandsFilter())
 	require.Equal(t, set.New(1, 2, 3), actualCoastalLands)
 }

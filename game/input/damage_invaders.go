@@ -3,7 +3,7 @@ package input
 import (
 	"bufio"
 	"fmt"
-	"github.com/mieubrisse/open-spirit-island/game_state/island"
+	"github.com/mieubrisse/open-spirit-island/game/game_state/island"
 	"os"
 	"strconv"
 	"strings"

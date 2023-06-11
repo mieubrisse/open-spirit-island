@@ -1,13 +1,13 @@
-package game_state_transitions
+package transitions
 
 import (
 	"fmt"
 	"github.com/bobg/go-generics/v2/set"
-	"github.com/mieubrisse/open-spirit-island/game_state"
-	"github.com/mieubrisse/open-spirit-island/game_state/decks/power"
-	"github.com/mieubrisse/open-spirit-island/game_state/island/filter"
-	"github.com/mieubrisse/open-spirit-island/game_state/island/land_type"
-	"github.com/mieubrisse/open-spirit-island/input"
+	"github.com/mieubrisse/open-spirit-island/game/game_state"
+	"github.com/mieubrisse/open-spirit-island/game/game_state/decks/power"
+	filter2 "github.com/mieubrisse/open-spirit-island/game/game_state/island/filter"
+	"github.com/mieubrisse/open-spirit-island/game/game_state/island/land_type"
+	"github.com/mieubrisse/open-spirit-island/game/input"
 	"sort"
 )
 
@@ -25,13 +25,13 @@ var ReclaimAllCardsTransition = func(state game_state.GameState) game_state.Game
 
 func NewNormalAddPresenceTransition(addRange int) GameStateTransition {
 	return func(state game_state.GameState) game_state.GameState {
-		landIdxOptionsSet := state.BoardState.FilterLands(filter.IslandFilter{
-			SourceFilter: filter.LandFilter{
+		landIdxOptionsSet := state.BoardState.FilterLands(filter2.IslandFilter{
+			SourceFilter: filter2.LandFilter{
 				PresenceMin: 1,
 			},
 			MinRange: 0,
 			MaxRange: addRange,
-			TargetFilter: filter.LandFilter{
+			TargetFilter: filter2.LandFilter{
 				LandTypes: land_type.NonOceanLandTypes,
 			},
 		})

@@ -5,9 +5,9 @@ import (
 	"github.com/imdario/mergo"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
-	"github.com/mieubrisse/open-spirit-island/game_state/decks/blighted_island"
-	"github.com/mieubrisse/open-spirit-island/game_state/decks/fear"
-	"github.com/mieubrisse/open-spirit-island/game_state/decks/invader_deck"
+	"github.com/mieubrisse/open-spirit-island/game/game_state/decks/blighted_island"
+	"github.com/mieubrisse/open-spirit-island/game/game_state/decks/fear"
+	"github.com/mieubrisse/open-spirit-island/game/game_state/decks/invader_deck"
 	"math"
 	"strings"
 )

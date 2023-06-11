@@ -3,14 +3,14 @@ package game_state
 import (
 	"fmt"
 	"github.com/bobg/go-generics/v2/set"
-	"github.com/mieubrisse/open-spirit-island/game_state/invader_board"
-	"github.com/mieubrisse/open-spirit-island/game_state/island"
-	"github.com/mieubrisse/open-spirit-island/game_state/island/filter"
-	"github.com/mieubrisse/open-spirit-island/game_state/island/land_type"
-	"github.com/mieubrisse/open-spirit-island/game_state/player"
-	"github.com/mieubrisse/open-spirit-island/game_state/status"
-	"github.com/mieubrisse/open-spirit-island/input"
-	"github.com/mieubrisse/open-spirit-island/utils"
+	"github.com/mieubrisse/open-spirit-island/game/game_state/invader_board"
+	"github.com/mieubrisse/open-spirit-island/game/game_state/island"
+	filter2 "github.com/mieubrisse/open-spirit-island/game/game_state/island/filter"
+	"github.com/mieubrisse/open-spirit-island/game/game_state/island/land_type"
+	"github.com/mieubrisse/open-spirit-island/game/game_state/player"
+	"github.com/mieubrisse/open-spirit-island/game/game_state/status"
+	input2 "github.com/mieubrisse/open-spirit-island/game/input"
+	"github.com/mieubrisse/open-spirit-island/game/utils"
 	"sort"
 	"strings"
 )
@@ -112,8 +112,8 @@ func (state GameState) RunInvaderPhase() GameState {
 		return state
 	}
 
-	liveInvaderLandsFilter := filter.IslandFilter{
-		TargetFilter: filter.LandFilter{
+	liveInvaderLandsFilter := filter2.IslandFilter{
+		TargetFilter: filter2.LandFilter{
 			// This is needed because Ocean's Hungry Grasp can drown invaders
 			LandTypes:   land_type.NonOceanLandTypes,
 			InvadersMin: 1,
@@ -140,7 +140,7 @@ func (state GameState) RunInvaderPhase() GameState {
 
 			// Dahan strike back
 			dahanDamage := island.DahanBaseDamage * len(ravageLand.DahanHealth)
-			ravageLand.CityHealth, ravageLand.TownHealth, ravageLand.ExplorerHealth = input.DamageInvaders(
+			ravageLand.CityHealth, ravageLand.TownHealth, ravageLand.ExplorerHealth = input2.DamageInvaders(
 				"Dahan",
 				ravageLand.CityHealth,
 				ravageLand.TownHealth,
@@ -183,24 +183,24 @@ func (state GameState) RunInvaderPhase() GameState {
 	}
 
 	// Explore
-	coastalLandIdxs := state.BoardState.FilterLands(filter.NewCoastalLandsFilter())
-	townExplorableLandIdxs := state.BoardState.FilterLands(filter.IslandFilter{
-		SourceFilter: filter.LandFilter{
+	coastalLandIdxs := state.BoardState.FilterLands(filter2.NewCoastalLandsFilter())
+	townExplorableLandIdxs := state.BoardState.FilterLands(filter2.IslandFilter{
+		SourceFilter: filter2.LandFilter{
 			TownsMin: 1,
 		},
 		MinRange: 0,
 		MaxRange: 1,
-		TargetFilter: filter.LandFilter{
+		TargetFilter: filter2.LandFilter{
 			LandTypes: land_type.NonOceanLandTypes,
 		},
 	})
-	cityExplorableLandIdxs := state.BoardState.FilterLands(filter.IslandFilter{
-		SourceFilter: filter.LandFilter{
+	cityExplorableLandIdxs := state.BoardState.FilterLands(filter2.IslandFilter{
+		SourceFilter: filter2.LandFilter{
 			CitiesMin: 1,
 		},
 		MinRange: 0,
 		MaxRange: 1,
-		TargetFilter: filter.LandFilter{
+		TargetFilter: filter2.LandFilter{
 			LandTypes: land_type.NonOceanLandTypes,
 		},
 	})
@@ -235,11 +235,11 @@ func (state GameState) blightLandWithCascade(landIdx int) GameState {
 	for shouldBlightCascade {
 		sourceLand := state.BoardState.Lands[sourceLandIdx]
 
-		adjacentLandIdxsSet := state.BoardState.FilterLands(filter.IslandFilter{
+		adjacentLandIdxsSet := state.BoardState.FilterLands(filter2.IslandFilter{
 			SourceNumbers: set.New(sourceLandIdx),
 			MinRange:      1,
 			MaxRange:      1,
-			TargetFilter:  filter.LandFilter{LandTypes: land_type.NonOceanLandTypes},
+			TargetFilter:  filter2.LandFilter{LandTypes: land_type.NonOceanLandTypes},
 		})
 		adjacentLandIdxs := adjacentLandIdxsSet.Slice()
 		sort.Ints(adjacentLandIdxs)
@@ -250,7 +250,7 @@ func (state GameState) blightLandWithCascade(landIdx int) GameState {
 			optionStrs[i] = fmt.Sprintf("%s #%d (%d Blight, %d Presence)", adjacentLand.LandType, adjacentIdx, adjacentLand.NumBlight, adjacentLand.NumPresence)
 		}
 
-		selection := input.GetSelectionFromOptions(
+		selection := input2.GetSelectionFromOptions(
 			fmt.Sprintf("%s #%d is suffering a Blight cascade; select an adjacent land to spread Blight to:", sourceLand.LandType, sourceLandIdx),
 			optionStrs,
 		)
