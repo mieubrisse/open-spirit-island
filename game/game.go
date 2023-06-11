@@ -12,6 +12,7 @@ import (
 	"github.com/mieubrisse/open-spirit-island/game/transitions"
 	"github.com/mieubrisse/open-spirit-island/game/utils"
 	"sort"
+	"strings"
 )
 
 func RunGameLoop() {
@@ -79,10 +80,13 @@ func RunGrowthPhase(state game_state.GameState) game_state.GameState {
 		},
 	}
 
-	growthChoicesStrs := []string{
-		"Reclaim All Cards, +🪔 —2→",
-		"TODO POWER CARD, +🪔 —0→",
-		"+🪔 —1→, +2 ⚡",
+	growthChoicesStrs := make([]string, len(growthChoices))
+	for i, choiceSubcomponents := range growthChoices {
+		choiceComponentStrs := make([]string, len(choiceSubcomponents))
+		for j, subcomponent := range choiceSubcomponents {
+			choiceComponentStrs[j] = subcomponent.String()
+		}
+		growthChoicesStrs[i] = strings.Join(choiceComponentStrs, "   |   ")
 	}
 
 	selectionIdx := input.GetSelectionFromOptions("Select a Growth option:", growthChoicesStrs)
@@ -91,7 +95,7 @@ func RunGrowthPhase(state game_state.GameState) game_state.GameState {
 
 	newGameState := state
 	for _, transition := range growthSelection {
-		newGameState = transition(newGameState)
+		newGameState = transition.TransitionFunction(newGameState)
 	}
 
 	// TODO elemental income

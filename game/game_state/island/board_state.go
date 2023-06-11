@@ -51,7 +51,7 @@ var columnConfigOverrides = []table.ColumnConfig{
 		}
 		return strings.Join(adjacentLandsStrList, ",")
 	}},
-	{Name: "🪔", Transformer: renderIntegerSkip0},
+	{Name: "🪔"},
 	{Name: "Dahan"},
 	{Name: "Invaders"},
 	{Name: "Invader Damage", Transformer: renderIntegerSkip0},
@@ -163,7 +163,7 @@ func (state IslandBoardState) String() string {
 			i,
 			land.LandType,
 			adjacentLandIdxs,
-			land.NumPresence,
+			strings.Repeat("🪔", land.NumPresence),
 			dahanCell,
 			invaderCell,
 			// TODO account for defense

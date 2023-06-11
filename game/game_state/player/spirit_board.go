@@ -12,27 +12,4 @@ type SpiritBoardState struct {
 	BottomTrackRevealed int
 }
 
-func NewDummySpiritBoard() SpiritBoardState {
-	return SpiritBoardState{
-		spiritPhaseOptions: [][]action.Action{
-			{},
-		},
-		topTrack: []action.Action{
-			action.NewDummyAction(),
-		},
-		topTrackRevealed: 1,
-		bottomTrack: []action.Action{
-			action.NewDummyAction(),
-		},
-		bottomTrackRevealed: 1,
-	}
-}
-
-
-// TODO all the spirits
-
-func (s SpiritBoardState) String() string {
-	//TODO implement me
-	panic("implement me")
-}
 */

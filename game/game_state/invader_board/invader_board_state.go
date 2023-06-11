@@ -24,7 +24,7 @@ var baseColumnConfig = table.ColumnConfig{
 var columnConfigOverrides = []table.ColumnConfig{
 	{Name: ""},
 	{Name: "Fear Cards"},
-	{Name: "Fear"},
+	{Name: "☠️"},
 	{Name: "Terror Level"},
 }
 
