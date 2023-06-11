@@ -10,11 +10,14 @@ import (
 type PlayerState struct {
 	Energy int
 
-	Hand set.Of[power.PowerCardID]
+	// Represents the elements the player has as a result of their plays
+	Elements map[power.Element]int
 
-	Played set.Of[power.PowerCardID]
+	Hand set.Of[power.PowerCardTransitionsID]
 
-	Discard set.Of[power.PowerCardID]
+	Played set.Of[power.PowerCardTransitionsID]
+
+	Discard set.Of[power.PowerCardTransitionsID]
 
 	// TODO hand
 	// TODO cards played

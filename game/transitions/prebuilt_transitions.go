@@ -18,7 +18,7 @@ var ReclaimAllCardsTransition = GameStateTransition{
 		newPlayerState := state.PlayerState
 
 		newPlayerState.Hand.Add(newPlayerState.Discard.Slice()...)
-		newPlayerState.Discard = set.New[power.PowerCardID]()
+		newPlayerState.Discard = set.New[power.PowerCardTransitionsID]()
 
 		state.PlayerState = newPlayerState
 		return state

@@ -1,14 +1,14 @@
 package power
 
-type Element int
+type Element string
 
 const (
-	Sun Element = iota
-	Moon
-	Fire
-	Air
-	Water
-	Earth
-	Nature
-	Beast
+	Sun    Element = "☀️"
+	Moon           = "🌘"
+	Fire           = "🔥"
+	Air            = "🪶"
+	Water          = "💧"
+	Earth          = "⛰️"
+	Nature         = "🌿"
+	Beast          = "🦞"
 )
