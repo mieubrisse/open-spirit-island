@@ -105,11 +105,14 @@ func RunGrowthPhase(state game_state.GameState) game_state.GameState {
 
 	// TODO play & pay power cards
 
-	handCardTitles := make([]string, len(state.PlayerState.Hand))
-	handCardsSlice := state.PlayerState.Hand.Slice()
-	for i, handCard := range state.PlayerState.Hand.Slice() {
-		handCardTitles[i] = handCard.
+	isValidSelection := false
+	for {
 
+	}
+
+	handCardTitles := make([]string, len(state.PlayerState.Hand))
+	for i, handCard := range state.PlayerState.Hand {
+		handCardTitles[i] = handCard.Title
 	}
 	cardPlayOptions := state.PlayerState.Hand
 

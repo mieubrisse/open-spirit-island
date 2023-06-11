@@ -12,7 +12,7 @@ type PlayerState struct {
 	// TODO card plays
 
 	// Represents the elements the player has as a result of their plays
-	Elements map[power.Element]int
+	NumElements map[power.Element]int
 
 	Hand []power.PowerCard
 
@@ -29,7 +29,9 @@ func (state PlayerState) String() string {
 	}
 
 	for _, element := range power.ElementValues() {
-
+		elementSymbol := power.ElementSymbols[element]
+		count := state.NumElements[element]
+		fmt.Println(fmt.Sprintf("%s %d", elementSymbol, count))
 	}
 
 	return strings.Join(lines, "\n")
