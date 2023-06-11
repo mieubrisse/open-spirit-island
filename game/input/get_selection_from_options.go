@@ -4,9 +4,14 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 )
 
-func GetSelectionFromOptions(prompt string, options []string) int {
+func GetSingleSelection(prompt string, options []string) int {
+	return GetMultipleSelections(prompt, options, 1, 1)[0]
+}
+
+func GetMultipleSelections(prompt string, options []string, minSelectionsAllowed int, maxSelectionsAllowed int) []int {
 	fmt.Println(prompt)
 	for idx, option := range options {
 		fmt.Println(fmt.Sprintf(" %s) %s", base26Encode(idx), option))
@@ -14,6 +19,7 @@ func GetSelectionFromOptions(prompt string, options []string) int {
 
 	// TODO handle this error!
 
+outerLoop:
 	for {
 		fmt.Print("Select: ")
 		reader := bufio.NewReader(os.Stdin)
@@ -23,21 +29,37 @@ func GetSelectionFromOptions(prompt string, options []string) int {
 			panic("Got an error when reading user input: " + err.Error())
 		}
 
-		selection, err := base26Decode(string(line))
-		if err != nil {
-			fmt.Println("Unrecognized selection string")
+		fields := strings.Fields(string(line))
+		numFields := len(fields)
+		if numFields < minSelectionsAllowed {
+			fmt.Println(fmt.Sprintf("Require at least %d option(s) selected, but got %d", minSelectionsAllowed, numFields))
+			continue
+		}
+		if numFields > maxSelectionsAllowed {
+			fmt.Println(fmt.Sprintf("Require at max %d option(s) selected, but got %d", minSelectionsAllowed, numFields))
 			continue
 		}
 
-		if selection < 0 || selection >= len(options) {
-			fmt.Println(fmt.Sprintf(
-				"Selection must be %s-%s",
-				base26Encode(0),
-				base26Encode(len(options)-1),
-			))
-			continue
+		allSelectionIdxs := make([]int, numFields)
+		for i, field := range fields {
+			selectionIdx, err := base26Decode(field)
+			if err != nil {
+				fmt.Println("Selection '%s' is invalid", field)
+				continue outerLoop
+			}
+
+			if selectionIdx < 0 || selectionIdx >= len(options) {
+				fmt.Println(fmt.Sprintf(
+					"Selection '%s' is not in range %s-%s",
+					field,
+					base26Encode(0),
+					base26Encode(len(options)-1),
+				))
+				continue outerLoop
+			}
+			allSelectionIdxs[i] = selectionIdx
 		}
 
-		return selection
+		return allSelectionIdxs
 	}
 }

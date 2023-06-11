@@ -1,14 +1,26 @@
 package power
 
-type Element string
+//go:generate go run github.com/dmarkham/enumer -type=Element
+type Element int
 
 const (
-	Sun    Element = "☀️"
-	Moon           = "🌘"
-	Fire           = "🔥"
-	Air            = "🪶"
-	Water          = "💧"
-	Earth          = "⛰️"
-	Nature         = "🌿"
-	Beast          = "🦞"
+	Sun Element = iota
+	Moon
+	Fire
+	Air
+	Water
+	Earth
+	Nature
+	Animal
 )
+
+var ElementSymbols = map[Element]string{
+	Sun:    "☀️",
+	Moon:   "🌘",
+	Fire:   "🔥",
+	Air:    "🪶",
+	Water:  "💧",
+	Earth:  "⛰️",
+	Nature: "🌿",
+	Animal: "🦞",
+}

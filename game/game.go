@@ -66,6 +66,7 @@ func RunGrowthPhase(state game_state.GameState) game_state.GameState {
 		return state
 	}
 
+	// Growth
 	// TODO other spirit choices
 	growthChoices := [][]transitions.GameStateTransition{
 		{
@@ -91,7 +92,7 @@ func RunGrowthPhase(state game_state.GameState) game_state.GameState {
 		growthChoicesStrs[i] = strings.Join(choiceComponentStrs, "   |   ")
 	}
 
-	selectionIdx := input.GetSelectionFromOptions("Select a Growth option:", growthChoicesStrs)
+	selectionIdx := input.GetSingleSelection("Select a Growth option:", growthChoicesStrs)
 
 	growthSelection := growthChoices[selectionIdx]
 
@@ -103,6 +104,14 @@ func RunGrowthPhase(state game_state.GameState) game_state.GameState {
 	// TODO elemental income
 
 	// TODO play & pay power cards
+
+	handCardTitles := make([]string, len(state.PlayerState.Hand))
+	handCardsSlice := state.PlayerState.Hand.Slice()
+	for i, handCard := range state.PlayerState.Hand.Slice() {
+		handCardTitles[i] = handCard.
+
+	}
+	cardPlayOptions := state.PlayerState.Hand
 
 	return newGameState
 }
@@ -252,7 +261,7 @@ func blightLandWithCascade(state game_state.GameState, landIdx int) game_state.G
 			optionStrs[i] = fmt.Sprintf("%s #%d (%d Blight, %d Presence)", adjacentLand.LandType, adjacentIdx, adjacentLand.NumBlight, adjacentLand.NumPresence)
 		}
 
-		selection := input.GetSelectionFromOptions(
+		selection := input.GetSingleSelection(
 			fmt.Sprintf("%s #%d is suffering a Blight cascade; select an adjacent land to spread Blight to:", sourceLand.LandType, sourceLandIdx),
 			optionStrs,
 		)

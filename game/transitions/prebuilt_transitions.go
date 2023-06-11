@@ -47,7 +47,7 @@ func NewNormalAddPresenceTransition(addRange int) GameStateTransition {
 			options[idx] = fmt.Sprintf("%s #%d\t%s", land.LandType.String(), landIdx, suffixStr)
 		}
 
-		selection := input.GetSelectionFromOptions("Choose a land for +🪔:", options)
+		selection := input.GetSelectionsFromOptions("Choose a land for +🪔:", options)
 		selectedLandIdx := landIdxOptions[selection]
 
 		state.BoardState.Lands[selectedLandIdx].NumPresence++
