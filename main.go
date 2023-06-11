@@ -22,3 +22,18 @@ func main() {
 		fmt.Println(gameState.String())
 	}
 }
+
+func RunGrowthPhase() GameState {
+	// Can't change the game state beyond victory or defeat
+	if state.GetStatus() != status.Undecided {
+		return state
+	}
+
+	growthChoices :=
+
+	// TODO growth choice
+
+	// TODO elemental income
+
+	// TODO play & pay power cards
+}
