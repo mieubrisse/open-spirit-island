@@ -10,7 +10,7 @@ const (
 	Air
 	Water
 	Earth
-	Nature
+	Plant
 	Animal
 )
 
@@ -21,6 +21,6 @@ var ElementSymbols = map[Element]string{
 	Air:    "🪶",
 	Water:  "💧",
 	Earth:  "⛰️",
-	Nature: "🌿",
+	Plant:  "🌿",
 	Animal: "🦞",
 }

@@ -1,8 +1,13 @@
 package power
 
-type PowerCardSpeed string
+type PowerCardSpeed int
 
 const (
-	Fast PowerCardSpeed = "🦅"
-	Slow                = "🐢"
+	Fast PowerCardSpeed = iota
+	Slow
 )
+
+var PowerCardSpeedSymbols = map[PowerCardSpeed]string{
+	Fast: "🦅",
+	Slow: "🐢",
+}

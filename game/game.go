@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/bobg/go-generics/v2/set"
 	"github.com/mieubrisse/open-spirit-island/game/game_state"
-	"github.com/mieubrisse/open-spirit-island/game/game_state/decks/power"
+	"github.com/mieubrisse/open-spirit-island/game/game_state/decks/power/default_power_cards"
 	"github.com/mieubrisse/open-spirit-island/game/game_state/island"
 	"github.com/mieubrisse/open-spirit-island/game/game_state/island/filter"
 	"github.com/mieubrisse/open-spirit-island/game/game_state/island/land_type"
@@ -32,7 +32,7 @@ func RunGameLoop() {
 	}
 	gameState.BoardState.Lands[highestNumberedMountain].NumPresence += 2
 	gameState.BoardState.Lands[highestNumberedJungle].NumPresence += 1
-	gameState.PlayerState.Hand = set.New(power.DrawOfTheFruitfulEarth)
+	gameState.PlayerState.Hand = set.New(default_power_cards.DrawOfTheFruitfulEarth)
 
 	// First explore
 	printSection("Initial State")

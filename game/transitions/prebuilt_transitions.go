@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/bobg/go-generics/v2/set"
 	"github.com/mieubrisse/open-spirit-island/game/game_state"
-	"github.com/mieubrisse/open-spirit-island/game/game_state/decks/power"
+	"github.com/mieubrisse/open-spirit-island/game/game_state/decks/power/transition_ids"
 	"github.com/mieubrisse/open-spirit-island/game/game_state/island/filter"
 	"github.com/mieubrisse/open-spirit-island/game/game_state/island/land_type"
 	"github.com/mieubrisse/open-spirit-island/game/input"
@@ -18,7 +18,7 @@ var ReclaimAllCardsTransition = GameStateTransition{
 		newPlayerState := state.PlayerState
 
 		newPlayerState.Hand.Add(newPlayerState.Discard.Slice()...)
-		newPlayerState.Discard = set.New[power.PowerCardTransitionsID]()
+		newPlayerState.Discard = set.New[transition_ids.PowerCardTransitionsID]()
 
 		state.PlayerState = newPlayerState
 		return state

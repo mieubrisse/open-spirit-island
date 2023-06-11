@@ -30,11 +30,11 @@ func _ElementNoOp() {
 	_ = x[Air-(3)]
 	_ = x[Water-(4)]
 	_ = x[Earth-(5)]
-	_ = x[Nature-(6)]
+	_ = x[Plant-(6)]
 	_ = x[Animal-(7)]
 }
 
-var _ElementValues = []Element{Sun, Moon, Fire, Air, Water, Earth, Nature, Animal}
+var _ElementValues = []Element{Sun, Moon, Fire, Air, Water, Earth, Plant, Animal}
 
 var _ElementNameToValueMap = map[string]Element{
 	_ElementName[0:3]:        Sun,
@@ -49,8 +49,8 @@ var _ElementNameToValueMap = map[string]Element{
 	_ElementLowerName[14:19]: Water,
 	_ElementName[19:24]:      Earth,
 	_ElementLowerName[19:24]: Earth,
-	_ElementName[24:30]:      Nature,
-	_ElementLowerName[24:30]: Nature,
+	_ElementName[24:30]:      Plant,
+	_ElementLowerName[24:30]: Plant,
 	_ElementName[30:36]:      Animal,
 	_ElementLowerName[30:36]: Animal,
 }

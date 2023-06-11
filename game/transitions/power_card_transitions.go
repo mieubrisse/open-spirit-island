@@ -1,5 +1,7 @@
 package transitions
 
-import "github.com/mieubrisse/open-spirit-island/game/game_state/decks/power"
+import (
+	"github.com/mieubrisse/open-spirit-island/game/game_state/decks/power/transition_ids"
+)
 
-var PowerCardTransitions = map[power.PowerCardTransitionsID]GameStateTransition{}
+var PowerCardTransitions = map[transition_ids.PowerCardTransitionsID]GameStateTransition{}
