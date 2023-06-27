@@ -9,7 +9,7 @@ import (
 type PlayerState struct {
 	Energy int
 
-	// TODO card plays remaining
+	CardPlaysRemaining int
 
 	// Represents the elements the player has as a result of their plays
 	NumElements map[power.Element]int

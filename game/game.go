@@ -104,7 +104,7 @@ func RunGrowthPhase(state game_state.GameState) game_state.GameState {
 	// TODO elemental income
 
 	oldHand := state.PlayerState.Hand
-	// TODO card plays
+	// TODO correct card plays
 	selectedHandCardIdxs, totalEnergyCost := input.PlayCards(oldHand, state.PlayerState.Energy, 99999)
 	newPlayed := make([]power.PowerCard, 0, len(selectedHandCardIdxs))
 	newHand := make([]power.PowerCard, 0, len(oldHand)-len(selectedHandCardIdxs))
@@ -117,6 +117,7 @@ func RunGrowthPhase(state game_state.GameState) game_state.GameState {
 		}
 	}
 	state.PlayerState.Energy -= totalEnergyCost
+	state.PlayerState.CardPlaysRemaining -= len(selectedHandCardIdxs)
 	state.PlayerState.Hand = newHand
 	state.PlayerState.Played = newPlayed
 
