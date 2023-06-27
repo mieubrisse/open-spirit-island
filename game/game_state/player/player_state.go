@@ -16,22 +16,34 @@ type PlayerState struct {
 
 	Hand []power.PowerCard
 
-	/*
-		Played set.Of[power.PowerCardTransitionsID]
+	Played []power.PowerCard
 
-		Discard set.Of[power.PowerCardTransitionsID]
-	*/
+	Discard []power.PowerCard
 }
 
 func (state PlayerState) String() string {
-	lines := []string{
-		fmt.Sprintf("⚡ %d", state.Energy),
-	}
+	energyLine := fmt.Sprintf("⚡ %d", state.Energy)
 
-	for _, element := range power.ElementValues() {
+	elementCountStrs := make([]string, len(power.ElementValues()))
+	for i, element := range power.ElementValues() {
 		elementSymbol := power.ElementSymbols[element]
 		count := state.NumElements[element]
-		fmt.Println(fmt.Sprintf("%s %d", elementSymbol, count))
+		elementCountStrs[i] = fmt.Sprintf("%s %d", elementSymbol, count)
+	}
+	elementCountsLine := strings.Join(elementCountStrs, "   ")
+
+	lines := []string{
+		energyLine,
+		elementCountsLine,
+	}
+
+	lines = append(lines, "-------- HAND ---------")
+	for _, card := range state.Hand {
+		lines = append(lines, card.String())
+	}
+	lines = append(lines, "-------- PLAYED ---------")
+	for _, card := range state.Played {
+		lines = append(lines, card.String())
 	}
 
 	return strings.Join(lines, "\n")

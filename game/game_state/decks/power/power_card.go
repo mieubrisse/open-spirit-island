@@ -24,7 +24,7 @@ type PowerCard struct {
 
 // TODO maybe move somewhere else???
 func (p PowerCard) String() string {
-	fmt.Println(fmt.Sprintf("%d⚡ %s", p.Cost, p.Title))
+	titleLine := fmt.Sprintf("%d⚡ %s", p.Cost, p.Title)
 
 	elementSymbols := make([]string, 0, len(p.Elements))
 	for _, element := range ElementValues() {
@@ -32,8 +32,13 @@ func (p PowerCard) String() string {
 			elementSymbols = append(elementSymbols, ElementSymbols[element])
 		}
 	}
-	fmt.Println(strings.Join(elementSymbols, ""))
+	elementLine := strings.Join(elementSymbols, "")
 
-	//TODO implement me
-	panic("implement me")
+	lines := []string{
+		titleLine,
+		elementLine,
+		p.FlavorText,
+	}
+	return strings.Join(lines, "\n")
 }
+

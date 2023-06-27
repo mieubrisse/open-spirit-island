@@ -2,13 +2,17 @@ package input
 
 import (
 	"fmt"
+	"github.com/bobg/go-generics/v2/set"
 )
 
 func GetSingleSelection(prompt string, options []string) int {
-	return GetMultipleSelections(prompt, options, 1, 1)[0]
+	for selectionIdx := range GetMultipleSelections(prompt, options, 1, 1) {
+		return selectionIdx
+	}
+	panic("Should never get here - we should always have exactly one selection")
 }
 
-func GetMultipleSelections(prompt string, options []string, minSelectionsAllowed int, maxSelectionsAllowed int) []int {
+func GetMultipleSelections(prompt string, options []string, minSelectionsAllowed int, maxSelectionsAllowed int) set.Of[int] {
 	fmt.Println(prompt)
 	for idx, option := range options {
 		fmt.Println(fmt.Sprintf(" %s) %s", base26Encode(idx), option))

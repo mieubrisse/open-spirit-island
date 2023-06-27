@@ -2,9 +2,8 @@ package transitions
 
 import (
 	"fmt"
-	"github.com/bobg/go-generics/v2/set"
 	"github.com/mieubrisse/open-spirit-island/game/game_state"
-	"github.com/mieubrisse/open-spirit-island/game/game_state/decks/power/transition_ids"
+	"github.com/mieubrisse/open-spirit-island/game/game_state/decks/power"
 	"github.com/mieubrisse/open-spirit-island/game/game_state/island/filter"
 	"github.com/mieubrisse/open-spirit-island/game/game_state/island/land_type"
 	"github.com/mieubrisse/open-spirit-island/game/input"
@@ -15,12 +14,9 @@ import (
 var ReclaimAllCardsTransition = GameStateTransition{
 	ReadableStr: "All✋",
 	TransitionFunction: func(state game_state.GameState) game_state.GameState {
-		newPlayerState := state.PlayerState
+		state.PlayerState.Hand = append(state.PlayerState.Hand, state.PlayerState.Discard...)
+		state.PlayerState.Discard = []power.PowerCard{}
 
-		newPlayerState.Hand.Add(newPlayerState.Discard.Slice()...)
-		newPlayerState.Discard = set.New[transition_ids.PowerCardTransitionsID]()
-
-		state.PlayerState = newPlayerState
 		return state
 	},
 }
@@ -47,7 +43,7 @@ func NewNormalAddPresenceTransition(addRange int) GameStateTransition {
 			options[idx] = fmt.Sprintf("%s #%d\t%s", land.LandType.String(), landIdx, suffixStr)
 		}
 
-		selection := input.GetSelectionsFromOptions("Choose a land for +🪔:", options)
+		selection := input.GetSingleSelection("Choose a land for +🪔:", options)
 		selectedLandIdx := landIdxOptions[selection]
 
 		state.BoardState.Lands[selectedLandIdx].NumPresence++

@@ -2,11 +2,12 @@ package input
 
 import (
 	"fmt"
+	"github.com/bobg/go-generics/v2/set"
 	"github.com/mieubrisse/open-spirit-island/game/game_state/decks/power"
 	"strings"
 )
 
-func PlayCards(handCards []power.PowerCard, energyAvailable int, cardPlaysAvailable int) []int {
+func PlayCards(handCards []power.PowerCard, energyAvailable int, cardPlaysAvailable int) set.Of[int] {
 	fmt.Println("Choose cards to play:")
 	for i, card := range handCards {
 		firstLinePrefix := fmt.Sprintf(" %s) ", base26Encode(i))
@@ -34,11 +35,12 @@ func PlayCards(handCards []power.PowerCard, energyAvailable int, cardPlaysAvaila
 		}
 
 		totalEnergyCost := 0
-		for _, selectionIdx := range selectionIdxs {
+		for selectionIdx := range selectionIdxs {
 			totalEnergyCost += handCards[selectionIdx].Cost
 		}
 		if totalEnergyCost > energyAvailable {
 			fmt.Println(fmt.Sprintf("The selected cards cost %d⚡, but you only have %d⚡", totalEnergyCost, energyAvailable))
+			continue
 		}
 
 		return selectionIdxs

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/bobg/go-generics/v2/set"
 	"github.com/mieubrisse/open-spirit-island/game/game_state"
+	"github.com/mieubrisse/open-spirit-island/game/game_state/decks/power"
 	"github.com/mieubrisse/open-spirit-island/game/game_state/decks/power/default_power_cards"
 	"github.com/mieubrisse/open-spirit-island/game/game_state/island"
 	"github.com/mieubrisse/open-spirit-island/game/game_state/island/filter"
@@ -32,7 +33,7 @@ func RunGameLoop() {
 	}
 	gameState.BoardState.Lands[highestNumberedMountain].NumPresence += 2
 	gameState.BoardState.Lands[highestNumberedJungle].NumPresence += 1
-	gameState.PlayerState.Hand = set.New(default_power_cards.DrawOfTheFruitfulEarth)
+	gameState.PlayerState.Hand = []power.PowerCard{default_power_cards.DrawOfTheFruitfulEarth}
 
 	// First explore
 	printSection("Initial State")
@@ -96,27 +97,29 @@ func RunGrowthPhase(state game_state.GameState) game_state.GameState {
 
 	growthSelection := growthChoices[selectionIdx]
 
-	newGameState := state
 	for _, transition := range growthSelection {
-		newGameState = transition.TransitionFunction(newGameState)
+		state = transition.TransitionFunction(state)
 	}
 
 	// TODO elemental income
 
-	// TODO play & pay power cards
-
-	isValidSelection := false
-	for {
-
+	oldHand := state.PlayerState.Hand
+	// TODO card plays
+	selectedHandCardIdxs := input.PlayCards(oldHand, state.PlayerState.Energy, 99999)
+	newPlayed := make([]power.PowerCard, 0, len(selectedHandCardIdxs))
+	newHand := make([]power.PowerCard, 0, len(oldHand)-len(selectedHandCardIdxs))
+	for oldHandIdx := range state.PlayerState.Hand {
+		card := oldHand[oldHandIdx]
+		if selectedHandCardIdxs.Has(oldHandIdx) {
+			newPlayed = append(newPlayed, card)
+		} else {
+			newHand = append(newHand, card)
+		}
 	}
+	state.PlayerState.Hand = newHand
+	state.PlayerState.Played = newPlayed
 
-	handCardTitles := make([]string, len(state.PlayerState.Hand))
-	for i, handCard := range state.PlayerState.Hand {
-		handCardTitles[i] = handCard.Title
-	}
-	cardPlayOptions := state.PlayerState.Hand
-
-	return newGameState
+	return state
 }
 
 // Runs the invasion phase

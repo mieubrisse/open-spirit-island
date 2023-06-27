@@ -15,12 +15,12 @@ const (
 )
 
 var ElementSymbols = map[Element]string{
-	Sun:    "☀️",
-	Moon:   "🌘",
+	Sun:    "☀️ ",
+	Moon:   "🌒 ",
 	Fire:   "🔥",
-	Air:    "🪶",
+	Air:    "🪶 ",
 	Water:  "💧",
-	Earth:  "⛰️",
+	Earth:  "⛰️ ",
 	Plant:  "🌿",
 	Animal: "🦞",
 }

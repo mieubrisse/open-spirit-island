@@ -3,11 +3,12 @@ package input
 import (
 	"bufio"
 	"fmt"
+	"github.com/bobg/go-generics/v2/set"
 	"os"
 	"strings"
 )
 
-func readAndValidateSelection(numChoices, minNumChoices, maxNumChoices int) ([]int, error) {
+func readAndValidateSelection(numChoices, minNumChoices, maxNumChoices int) (set.Of[int], error) {
 	fmt.Print("Select: ")
 	reader := bufio.NewReader(os.Stdin)
 	// TODO handle isPrefix case?
@@ -25,8 +26,8 @@ func readAndValidateSelection(numChoices, minNumChoices, maxNumChoices int) ([]i
 		return nil, fmt.Errorf("Require at max %d option(s) selected, but got %d", maxNumChoices, numFields)
 	}
 
-	allSelectionIdxs := make([]int, numFields)
-	for i, field := range fields {
+	allSelectionIdxs := set.New[int]()
+	for _, field := range fields {
 		selectionIdx, err := base26Decode(field)
 		if err != nil {
 			return nil, fmt.Errorf("Selection '%s' is invalid", field)
@@ -40,7 +41,7 @@ func readAndValidateSelection(numChoices, minNumChoices, maxNumChoices int) ([]i
 				base26Encode(numChoices-1),
 			)
 		}
-		allSelectionIdxs[i] = selectionIdx
+		allSelectionIdxs.Add(selectionIdx)
 	}
 
 	return allSelectionIdxs, nil
