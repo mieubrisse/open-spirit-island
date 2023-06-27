@@ -9,7 +9,7 @@ import (
 type PlayerState struct {
 	Energy int
 
-	// TODO card plays
+	// TODO card plays remaining
 
 	// Represents the elements the player has as a result of their plays
 	NumElements map[power.Element]int
@@ -22,7 +22,7 @@ type PlayerState struct {
 }
 
 func (state PlayerState) String() string {
-	energyLine := fmt.Sprintf("⚡ %d", state.Energy)
+	energy := fmt.Sprintf("⚡ %d", state.Energy)
 
 	elementCountStrs := make([]string, len(power.ElementValues()))
 	for i, element := range power.ElementValues() {
@@ -30,11 +30,12 @@ func (state PlayerState) String() string {
 		count := state.NumElements[element]
 		elementCountStrs[i] = fmt.Sprintf("%s %d", elementSymbol, count)
 	}
-	elementCountsLine := strings.Join(elementCountStrs, "   ")
+	elementCounts := strings.Join(elementCountStrs, "   ")
+
+	talliesLine := energy + "   and   " + elementCounts
 
 	lines := []string{
-		energyLine,
-		elementCountsLine,
+		talliesLine,
 	}
 
 	lines = append(lines, "-------- HAND ---------")

@@ -24,7 +24,7 @@ var baseColumnConfig = table.ColumnConfig{
 var columnConfigOverrides = []table.ColumnConfig{
 	{Name: ""},
 	{Name: "Fear Cards"},
-	{Name: "☠️ "},
+	{Name: "☠️"},
 	{Name: "Terror Level"},
 }
 
@@ -172,9 +172,9 @@ func (state InvaderBoardState) String() string {
 	)
 
 	lines := []string{
-		invasionLine,
-		fearTable,
 		blightedIslandLine,
+		fearTable,
+		invasionLine,
 	}
 
 	return strings.Join(lines, "\n")

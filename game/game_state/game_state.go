@@ -77,7 +77,7 @@ func (state GameState) String() string {
 		state.InvaderState.String(),
 		state.BoardState.String(),
 		// TODO multiple players
-		"PLAYER",
+		"                                  PLAYER",
 		state.PlayerState.String(),
 	}
 

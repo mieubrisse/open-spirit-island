@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func PlayCards(handCards []power.PowerCard, energyAvailable int, cardPlaysAvailable int) set.Of[int] {
+func PlayCards(handCards []power.PowerCard, energyAvailable int, cardPlaysAvailable int) (set.Of[int], int) {
 	fmt.Println("Choose cards to play:")
 	for i, card := range handCards {
 		firstLinePrefix := fmt.Sprintf(" %s) ", base26Encode(i))
@@ -43,6 +43,6 @@ func PlayCards(handCards []power.PowerCard, energyAvailable int, cardPlaysAvaila
 			continue
 		}
 
-		return selectionIdxs
+		return selectionIdxs, totalEnergyCost
 	}
 }

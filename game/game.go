@@ -105,7 +105,7 @@ func RunGrowthPhase(state game_state.GameState) game_state.GameState {
 
 	oldHand := state.PlayerState.Hand
 	// TODO card plays
-	selectedHandCardIdxs := input.PlayCards(oldHand, state.PlayerState.Energy, 99999)
+	selectedHandCardIdxs, totalEnergyCost := input.PlayCards(oldHand, state.PlayerState.Energy, 99999)
 	newPlayed := make([]power.PowerCard, 0, len(selectedHandCardIdxs))
 	newHand := make([]power.PowerCard, 0, len(oldHand)-len(selectedHandCardIdxs))
 	for oldHandIdx := range state.PlayerState.Hand {
@@ -116,6 +116,7 @@ func RunGrowthPhase(state game_state.GameState) game_state.GameState {
 			newHand = append(newHand, card)
 		}
 	}
+	state.PlayerState.Energy -= totalEnergyCost
 	state.PlayerState.Hand = newHand
 	state.PlayerState.Played = newPlayed
 
