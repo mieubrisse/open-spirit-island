@@ -7,18 +7,21 @@ import (
 type LandState struct {
 	LandType land_type.LandType
 
-	// TODO something to reflect that replaced invaders keep the damage they have
-	ExplorerHealth    []int
-	ExplorerMaxHealth int
+	// NOTE: Spirit Island bookkeeping uses *damage taken*, NOT health, as a way to track death
+	// Meaning, if Dahan temporarily have 5 health, one takes 4 damage, and it then gets moved
+	// to a land where Dahan have 2 health, the Dahan will die
 
-	TownHealth    []int
-	TownMaxHealth int
+	ExplorerDamageTaken []int
+	ExplorerHealth      int
 
-	CityHealth    []int
-	CityMaxHealth int
+	TownDamageTaken []int
+	TownHealth      int
 
-	DahanHealth    []int
-	DahanMaxHealth int
+	CityDamageTaken []int
+	CityHealth      int
+
+	DahanDamageTaken []int
+	DahanHealth      int
 
 	NumBlight int
 

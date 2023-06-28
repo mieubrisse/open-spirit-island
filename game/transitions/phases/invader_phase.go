@@ -35,7 +35,7 @@ func RunInvaderPhase(state game_state.GameState) game_state.GameState {
 
 			// TODO ravage skips
 
-			invaderDamage := island.ExplorerBaseDamage*len(ravageLand.ExplorerHealth) + island.TownBaseDamage*len(ravageLand.TownHealth) + island.CityBaseDamage*len(ravageLand.CityHealth)
+			invaderDamage := island.ExplorerBaseDamage*len(ravageLand.ExplorerDamageTaken) + island.TownBaseDamage*len(ravageLand.TownDamageTaken) + island.CityBaseDamage*len(ravageLand.CityDamageTaken)
 
 			// Dahan are attacked
 			// From the rules, Dahan must be destroyed as efficiently as possible
@@ -199,34 +199,46 @@ func blightSingleLand(state game_state.GameState, landIdx int) (game_state.GameS
 	return state, shouldBlightCascade
 }
 
-func efficientlyDamageDahan(currentDahanHp []int, damageToDistribute int) []int {
-	var workingCopy []int
+// To efficiently distribute damage, we hunt the most-damaged Dahan first (i.e. always using the
+// least amount of damage to gain kills)
+func efficientlyDamageDahan(damageTaken []int, dahanHealth int, damageToDistribute int) []int {
+	var damageTakenCopy []int
 
-	if len(currentDahanHp) == 0 {
-		return workingCopy
+	if len(damageTaken) == 0 {
+		return damageTaken
 	}
 
-	workingCopy = make([]int, len(currentDahanHp))
-	copy(workingCopy, currentDahanHp)
+	damageTakenCopy = make([]int, len(damageTaken))
+	copy(damageTakenCopy, damageTaken)
 
-	// To efficiently distribute damage, we hunt the weakest Dahan first (always using the
-	// least amount of damage to gain kills)
-	dahanHealthToTarget := 1
-	for damageToDistribute > 0 {
-		for i, dahanHp := range workingCopy {
-			if dahanHp == dahanHealthToTarget {
-				damageConsumed := utils.GetMintInt(dahanHp, damageToDistribute)
-				workingCopy[i] -= damageConsumed
-				damageToDistribute -= damageConsumed
-			}
+	// Therefore, we need to sort the Dahan from most-damaged to least-damaged
+	dahanKillOrder := make([]int, len(damageTaken))
+	for i := 0; i < len(damageTaken); i++ {
+		dahanKillOrder[i] = i
+	}
+	sort.Slice(dahanKillOrder, func(i, j int) bool {
+		return damageTaken[i] > damageTaken[j]
+	})
+
+	// Now, start killing the weakest Dahan first
+	remainingDamageToDistribute := damageToDistribute
+	for _, dahanIdx := range dahanKillOrder {
+		if remainingDamageToDistribute == 0 {
+			break
 		}
-		dahanHealthToTarget++ // Now hunt the next-strongest Dahan
+
+		damageToKill := dahanHealth - damageTakenCopy[dahanIdx]
+		damageSpent := utils.GetMintInt(damageToKill, remainingDamageToDistribute)
+
+		damageTakenCopy[dahanIdx] += damageSpent
+		remainingDamageToDistribute -= damageSpent
 	}
 
+	// Finally, cull the dead Dahan
 	var result []int
-	for _, hp := range workingCopy {
-		if hp > 0 {
-			result = append(result, hp)
+	for _, damage := range damageTakenCopy {
+		if damage < dahanHealth {
+			result = append(result, damage)
 		}
 	}
 

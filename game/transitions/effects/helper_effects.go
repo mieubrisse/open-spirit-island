@@ -132,13 +132,13 @@ func NewGatherObjectEffect(min int, max int, objectType ObjectType) func(state g
 			var objectMaxHp int
 			switch objectType {
 			case Dahan:
-				objectMaxHp = land.DahanMaxHealth
+				objectMaxHp = land.DahanHealth
 			case Explorer:
-				objectMaxHp = land.ExplorerMaxHealth
+				objectMaxHp = land.ExplorerHealth
 			case Town:
-				objectMaxHp = land.TownMaxHealth
+				objectMaxHp = land.TownHealth
 			case City:
-				objectMaxHp = land.CityMaxHealth
+				objectMaxHp = land.CityHealth
 			default:
 				panic(fmt.Errorf("Unrecognized object type: %d", objectType))
 			}
