@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/bobg/go-generics/v2/set"
 	"github.com/mieubrisse/open-spirit-island/game/game_state"
-	"github.com/mieubrisse/open-spirit-island/game/game_state/island"
 	"github.com/mieubrisse/open-spirit-island/game/game_state/island/filter"
 	"github.com/mieubrisse/open-spirit-island/game/game_state/island/land_state"
 	"github.com/mieubrisse/open-spirit-island/game/input"
@@ -17,7 +16,7 @@ type gatherableObjectCoords struct {
 	currentLandIdx int
 
 	// Position within the array of same-type objects
-	currentObjectPositionIdx int
+	currentObjectListIdx int
 }
 
 func NewGatherDahanEffect(limit int) Effect {
@@ -55,7 +54,6 @@ func NewGatherObjectEffect(min int, max int, objectType ObjectType) func(state g
 	var objectHpGetter func(land land_state.LandState) []int
 	var objectHpSetter func(land *land_state.LandState, newList []int)
 	// TODO Account for base health increasing!!
-	var objectBaseHealth int
 	switch objectType {
 	case Dahan:
 		targetFilter.DahanMin = 1
@@ -66,7 +64,6 @@ func NewGatherObjectEffect(min int, max int, objectType ObjectType) func(state g
 		objectHpSetter = func(land *land_state.LandState, newList []int) {
 			land.DahanHealth = newList
 		}
-		objectBaseHealth = island.DahanBaseHealth
 	case Explorer:
 		targetFilter.ExplorersMin = 1
 		objectEmoji = static_assets.ExplorerSymbol
@@ -76,7 +73,6 @@ func NewGatherObjectEffect(min int, max int, objectType ObjectType) func(state g
 		objectHpSetter = func(land *land_state.LandState, newList []int) {
 			land.ExplorerHealth = newList
 		}
-		objectBaseHealth = island.ExplorerBaseHealth
 	case Town:
 		targetFilter.TownsMin = 1
 		objectEmoji = static_assets.TownSymbol
@@ -86,7 +82,6 @@ func NewGatherObjectEffect(min int, max int, objectType ObjectType) func(state g
 		objectHpSetter = func(land *land_state.LandState, newList []int) {
 			land.TownHealth = newList
 		}
-		objectBaseHealth = island.TownBaseHealth
 	case City:
 		targetFilter.CitiesMin = 1
 		objectEmoji = static_assets.CitySymbol
@@ -96,7 +91,6 @@ func NewGatherObjectEffect(min int, max int, objectType ObjectType) func(state g
 		objectHpSetter = func(land *land_state.LandState, newList []int) {
 			land.CityHealth = newList
 		}
-		objectBaseHealth = island.CityBaseHealth
 	default:
 		panic(fmt.Errorf("Unrecognized object type: %d", objectType))
 	}
@@ -120,6 +114,7 @@ func NewGatherObjectEffect(min int, max int, objectType ObjectType) func(state g
 		})
 
 		if len(eligibleGatherSourcesSet) == 0 {
+			// TODO log a "no X to gather" message
 			return gameState
 		}
 
@@ -127,24 +122,52 @@ func NewGatherObjectEffect(min int, max int, objectType ObjectType) func(state g
 		sort.Ints(eligibleGatherSourcesList)
 
 		// Find all the matching object types in the lands, and build:
-		// - prompts
+		// - options
 		// - references to where they are
-		prompts := make([]string, 0, len(eligibleGatherSourcesList))
-		objectCoords := make([]gatherableObjectCoords, 0, len(eligibleGatherSourcesList))
+		optionStrs := make([]string, 0, len(eligibleGatherSourcesList))
+		allObjectCoords := make([]gatherableObjectCoords, 0, len(eligibleGatherSourcesList))
 		for i, landIdx := range eligibleGatherSourcesList {
 			land := gameState.BoardState.Lands[i]
 
-			objectHps := objectHpGetter(land)
+			var objectMaxHp int
+			switch objectType {
+			case Dahan:
+				objectMaxHp = land.DahanMaxHealth
+			case Explorer:
+				objectMaxHp = land.ExplorerMaxHealth
+			case Town:
+				objectMaxHp = land.TownMaxHealth
+			case City:
+				objectMaxHp = land.CityMaxHealth
+			default:
+				panic(fmt.Errorf("Unrecognized object type: %d", objectType))
+			}
 
-			prompts = append(
-				prompts,
-				fmt.Sprintf("%s %d (%d/%d)"),
-			)
+			objectHps := objectHpGetter(land)
+			for objectListIdx, hp := range objectHps {
+				optionStrs = append(
+					optionStrs,
+					fmt.Sprintf("%s #%d (%d/%d)", land.LandType.String(), landIdx, hp, objectMaxHp),
+				)
+				allObjectCoords = append(
+					allObjectCoords,
+					gatherableObjectCoords{
+						currentLandIdx:       landIdx,
+						currentObjectListIdx: objectListIdx,
+					},
+				)
+			}
 		}
 
-		input.GetMultipleSelections(effectStr, min, max)
+		selections := input.GetMultipleSelections(effectStr, optionStrs, min, max)
+		for _, selectionIdx := range selections {
+			coords := allObjectCoords[selectionIdx]
+			land := gameState.BoardState.Lands[coords.currentLandIdx]
 
-		// TODO log a "no X to gather" message
+			land.slices.Delete()
+		}
+
+		// TODO check for objects that need to be destroyed (have taken damage > their health)
 	}
 
 	return Effect{

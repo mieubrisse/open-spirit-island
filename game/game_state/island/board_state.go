@@ -9,16 +9,19 @@ import (
 
 // TODO one day make these customizable?
 const (
-	DahanBaseHealth = 2
-	DahanBaseDamage = 2
+	/*
+		DahanBaseHealth = 2
 
-	CityBaseHealth = 3
-	CityBaseDamage = 3
+		CityBaseHealth = 3
 
-	TownBaseHealth = 2
-	TownBaseDamage = 2
+		TownBaseHealth = 2
 
-	ExplorerBaseHealth = 1
+		ExplorerBaseHealth = 1
+	*/
+
+	DahanBaseDamage    = 2
+	CityBaseDamage     = 3
+	TownBaseDamage     = 2
 	ExplorerBaseDamage = 1
 )
 

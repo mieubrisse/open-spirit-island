@@ -8,11 +8,17 @@ type LandState struct {
 	LandType land_type.LandType
 
 	// TODO something to reflect that replaced invaders keep the damage they have
-	ExplorerHealth []int
-	TownHealth     []int
-	CityHealth     []int
+	ExplorerHealth    []int
+	ExplorerMaxHealth int
 
-	DahanHealth []int
+	TownHealth    []int
+	TownMaxHealth int
+
+	CityHealth    []int
+	CityMaxHealth int
+
+	DahanHealth    []int
+	DahanMaxHealth int
 
 	NumBlight int
 
