@@ -11,16 +11,16 @@ type LandState struct {
 	// Meaning, if Dahan temporarily have 5 health, one takes 4 damage, and it then gets moved
 	// to a land where Dahan have 2 health, the Dahan will die
 
-	ExplorerDamageTaken []int
+	ExplorerDamageTaken []int // Len is a count of the number of explorers
 	ExplorerHealth      int
 
-	TownDamageTaken []int
+	TownDamageTaken []int // Len is a count of the number of towns
 	TownHealth      int
 
-	CityDamageTaken []int
+	CityDamageTaken []int // Len is a count of the number of cities
 	CityHealth      int
 
-	DahanDamageTaken []int
+	DahanDamageTaken []int // Len is a count of the number of Dahan
 	DahanHealth      int
 
 	NumBlight int

@@ -8,7 +8,7 @@ import (
 	"github.com/mieubrisse/open-spirit-island/game/game_state/island/filter"
 	"github.com/mieubrisse/open-spirit-island/game/game_state/island/land_type"
 	"github.com/mieubrisse/open-spirit-island/game/game_state/status"
-	"github.com/mieubrisse/open-spirit-island/game/input"
+	input2 "github.com/mieubrisse/open-spirit-island/game/transitions/input"
 	"github.com/mieubrisse/open-spirit-island/game/utils"
 	"sort"
 )
@@ -39,19 +39,17 @@ func RunInvaderPhase(state game_state.GameState) game_state.GameState {
 
 			// Dahan are attacked
 			// From the rules, Dahan must be destroyed as efficiently as possible
-			ravageLand.DahanHealth = efficientlyDamageDahan(ravageLand.DahanHealth, invaderDamage)
+			ravageLand.DahanDamageTaken = efficientlyDamageDahan(ravageLand.DahanDamageTaken, ravageLand.DahanHealth, invaderDamage)
 
 			// Dahan strike back
-			dahanDamage := island.DahanBaseDamage * len(ravageLand.DahanHealth)
-			ravageLand.CityHealth, ravageLand.TownHealth, ravageLand.ExplorerHealth = input.DamageInvaders(
+			dahanDamage := island.DahanBaseDamage * len(ravageLand.DahanDamageTaken)
+			ravageLand = input2.DamageInvaders(
 				"Dahan",
-				ravageLand.CityHealth,
-				ravageLand.TownHealth,
-				ravageLand.ExplorerHealth,
+				ravageLand,
 				dahanDamage,
 			)
 
-			// TODO defend
+			// TODO defend (Dahan and Land)
 
 			if invaderDamage >= 2 {
 				state = blightLandWithCascade(state, landIdx)
@@ -76,10 +74,10 @@ func RunInvaderPhase(state game_state.GameState) game_state.GameState {
 			buildLand := state.BoardState.Lands[landIdx]
 			// TODO build skips
 
-			if len(buildLand.TownHealth) > len(buildLand.CityHealth) {
-				buildLand.CityHealth = append(buildLand.CityHealth, island.CityBaseHealth)
+			if len(buildLand.TownDamageTaken) > len(buildLand.CityDamageTaken) {
+				buildLand.CityDamageTaken = append(buildLand.CityDamageTaken, 0)
 			} else {
-				buildLand.TownHealth = append(buildLand.TownHealth, island.TownBaseHealth)
+				buildLand.TownDamageTaken = append(buildLand.TownDamageTaken, 0)
 			}
 			state.BoardState.Lands[landIdx] = buildLand
 		}
@@ -118,7 +116,7 @@ func RunInvaderPhase(state game_state.GameState) game_state.GameState {
 		// TODO explore skip
 
 		exploreLand := state.BoardState.Lands[landIdx]
-		exploreLand.ExplorerHealth = append(exploreLand.ExplorerHealth, island.ExplorerBaseHealth)
+		exploreLand.ExplorerDamageTaken = append(exploreLand.ExplorerDamageTaken, 0)
 		state.BoardState.Lands[landIdx] = exploreLand
 	}
 
@@ -157,7 +155,7 @@ func blightLandWithCascade(state game_state.GameState, landIdx int) game_state.G
 			optionStrs[i] = fmt.Sprintf("%s #%d (%d Blight, %d Presence)", adjacentLand.LandType, adjacentIdx, adjacentLand.NumBlight, adjacentLand.NumPresence)
 		}
 
-		selection := input.GetSingleSelection(
+		selection := input2.GetSingleSelection(
 			fmt.Sprintf("%s #%d is suffering a Blight cascade; select an adjacent land to spread Blight to:", sourceLand.LandType, sourceLandIdx),
 			optionStrs,
 		)
@@ -212,11 +210,17 @@ func efficientlyDamageDahan(damageTaken []int, dahanHealth int, damageToDistribu
 	copy(damageTakenCopy, damageTaken)
 
 	// Therefore, we need to sort the Dahan from most-damaged to least-damaged
+	// (and we use i and j as tiebreakers)
 	dahanKillOrder := make([]int, len(damageTaken))
 	for i := 0; i < len(damageTaken); i++ {
 		dahanKillOrder[i] = i
 	}
 	sort.Slice(dahanKillOrder, func(i, j int) bool {
+		iDamage := damageTaken[i]
+		jDamage := damageTakenCopy[j]
+		if iDamage == jDamage {
+			return i < j
+		}
 		return damageTaken[i] > damageTaken[j]
 	})
 

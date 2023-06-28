@@ -2,9 +2,9 @@ package phases
 
 import (
 	"github.com/mieubrisse/open-spirit-island/game/game_state"
-	"github.com/mieubrisse/open-spirit-island/game/game_state/decks/power"
-	"github.com/mieubrisse/open-spirit-island/game/input"
+	"github.com/mieubrisse/open-spirit-island/game/game_state/decks"
 	"github.com/mieubrisse/open-spirit-island/game/transitions"
+	input2 "github.com/mieubrisse/open-spirit-island/game/transitions/input"
 	"strings"
 )
 
@@ -37,7 +37,7 @@ func RunSpiritGrowPhase(state game_state.GameState) game_state.GameState {
 		growthChoicesStrs[i] = strings.Join(choiceComponentStrs, "   |   ")
 	}
 
-	selectionIdx := input.GetSingleSelection("Select a Growth option:", growthChoicesStrs)
+	selectionIdx := input2.GetSingleSelection("Select a Growth option:", growthChoicesStrs)
 
 	growthSelection := growthChoices[selectionIdx]
 
@@ -69,14 +69,14 @@ func RunSpiritPlayPowerPhase(state game_state.GameState) game_state.GameState {
 	oldHand := state.PlayerState.Hand
 
 	// TODO correctly calculate card plays
-	selectedHandCardIdxs, totalEnergyCost := input.PlayCards(oldHand, state.PlayerState.Energy, state.PlayerState.CardPlaysRemaining)
+	selectedHandCardIdxs, totalEnergyCost := input2.PlayCards(oldHand, state.PlayerState.Energy, state.PlayerState.CardPlaysRemaining)
 	if len(selectedHandCardIdxs) == 0 {
 		state.Phase = game_state.FastPower
 		return state
 	}
 
-	newPlayed := make([]power.PowerCard, 0, len(selectedHandCardIdxs))
-	newHand := make([]power.PowerCard, 0, len(oldHand)-len(selectedHandCardIdxs))
+	newPlayed := make([]decks.PowerCardID, 0, len(selectedHandCardIdxs))
+	newHand := make([]decks.PowerCardID, 0, len(oldHand)-len(selectedHandCardIdxs))
 	for oldHandIdx := range state.PlayerState.Hand {
 		card := oldHand[oldHandIdx]
 		if selectedHandCardIdxs.Has(oldHandIdx) {

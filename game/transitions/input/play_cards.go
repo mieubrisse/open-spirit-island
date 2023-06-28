@@ -3,17 +3,19 @@ package input
 import (
 	"fmt"
 	"github.com/bobg/go-generics/v2/set"
-	"github.com/mieubrisse/open-spirit-island/game/game_state/decks/power"
+	"github.com/mieubrisse/open-spirit-island/game/game_state/decks"
+	"github.com/mieubrisse/open-spirit-island/game/transitions/card_data"
 	"strings"
 )
 
-func PlayCards(handCards []power.PowerCard, energyAvailable int, cardPlaysAvailable int) (set.Of[int], int) {
+func PlayCards(handCards []decks.PowerCardID, energyAvailable int, cardPlaysAvailable int) (set.Of[int], int) {
 	fmt.Println("Choose cards to play:")
-	for i, card := range handCards {
+	for i, cardId := range handCards {
 		firstLinePrefix := fmt.Sprintf(" %s) ", base26Encode(i))
 		secondPlusLinePrefix := strings.Repeat(" ", len(firstLinePrefix))
 
-		cardStr := card.String()
+		cardData := card_data.DefaultPowerCards[cardId]
+		cardStr := cardData.String()
 		optionLines := strings.Split(cardStr, "\n")
 		for j, line := range optionLines {
 			prefix := firstLinePrefix
@@ -36,7 +38,9 @@ func PlayCards(handCards []power.PowerCard, energyAvailable int, cardPlaysAvaila
 
 		totalEnergyCost := 0
 		for selectionIdx := range selectionIdxs {
-			totalEnergyCost += handCards[selectionIdx].Cost
+			cardId := handCards[selectionIdx]
+			cardData := card_data.DefaultPowerCards[cardId]
+			totalEnergyCost += cardData.Cost
 		}
 		if totalEnergyCost > energyAvailable {
 			fmt.Println(fmt.Sprintf("The selected cards cost %d⚡, but you only have %d⚡", totalEnergyCost, energyAvailable))

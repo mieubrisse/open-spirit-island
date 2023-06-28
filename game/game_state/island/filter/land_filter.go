@@ -32,17 +32,21 @@ func (filter LandFilter) Match(land land_state.LandState) bool {
 		}
 	}
 
-	if len(land.ExplorerHealth)+len(land.TownHealth)+len(land.CityHealth) < filter.InvadersMin {
+	numExplorers := len(land.ExplorerDamageTaken)
+	numTowns := len(land.TownDamageTaken)
+	numCities := len(land.CityDamageTaken)
+
+	if numExplorers+numTowns+numCities < filter.InvadersMin {
 		return false
 	}
 
-	if len(land.ExplorerHealth) < filter.ExplorersMin {
+	if numExplorers < filter.ExplorersMin {
 		return false
 	}
-	if len(land.TownHealth) < filter.TownsMin {
+	if numTowns < filter.TownsMin {
 		return false
 	}
-	if len(land.CityHealth) < filter.CitiesMin {
+	if numCities < filter.CitiesMin {
 		return false
 	}
 
@@ -50,7 +54,7 @@ func (filter LandFilter) Match(land land_state.LandState) bool {
 		return false
 	}
 
-	if len(land.DahanHealth) < filter.DahanMin {
+	if len(land.DahanDamageTaken) < filter.DahanMin {
 		return false
 	}
 	if land.NumPresence < filter.PresenceMin {

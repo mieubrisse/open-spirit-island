@@ -6,8 +6,8 @@ import (
 	"github.com/mieubrisse/open-spirit-island/game/game_state"
 	"github.com/mieubrisse/open-spirit-island/game/game_state/island/filter"
 	"github.com/mieubrisse/open-spirit-island/game/game_state/island/land_state"
-	"github.com/mieubrisse/open-spirit-island/game/input"
 	"github.com/mieubrisse/open-spirit-island/game/static_assets"
+	"github.com/mieubrisse/open-spirit-island/game/transitions/input"
 	"sort"
 )
 
@@ -19,27 +19,7 @@ type gatherableObjectCoords struct {
 	currentObjectListIdx int
 }
 
-func NewGatherDahanEffect(limit int) Effect {
-	applicator := func(state game_state.GameState, targetLandIdx int) game_state.GameState {
-		// Get adjacent lands with Dahan
-		state.BoardState.FilterLands(filter.IslandFilter{
-			SourceNumbers: set.New(targetLandIdx),
-			MinRange:      1,
-			MaxRange:      1,
-			TargetFilter: filter.LandFilter{
-				DahanMin: 1,
-			},
-		})
-
-	}
-
-	return Effect{
-		ReadableStr: fmt.Sprintf("Gather up to %d 🛖", limit),
-		Applicator:  applicator,
-	}
-}
-
-func NewGatherObjectEffect(min int, max int, objectType ObjectType) func(state game_state.GameState) game_state.GameState {
+func NewGatherObjectEffect(min int, max int, objectType ObjectType) LandTargetingEffect {
 	if max < min {
 		panic(fmt.Errorf("Cannot have a gather with max < min (got min %d, max %d)", min, max))
 	}
@@ -52,8 +32,6 @@ func NewGatherObjectEffect(min int, max int, objectType ObjectType) func(state g
 	}
 	var objectEmoji string
 	var objectHpGetter func(land land_state.LandState) []int
-	var objectHpSetter func(land *land_state.LandState, newList []int)
-	// TODO Account for base health increasing!!
 	switch objectType {
 	case Dahan:
 		targetFilter.DahanMin = 1
@@ -170,7 +148,7 @@ func NewGatherObjectEffect(min int, max int, objectType ObjectType) func(state g
 		// TODO check for objects that need to be destroyed (have taken damage > their health)
 	}
 
-	return Effect{
+	return LandTargetingEffect{
 		ReadableStr: effectStr,
 		Applicator:  applicator,
 	}

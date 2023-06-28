@@ -1,16 +1,6 @@
 package transitions
 
-import (
-	"fmt"
-	"github.com/mieubrisse/open-spirit-island/game/game_state"
-	"github.com/mieubrisse/open-spirit-island/game/game_state/decks/power"
-	"github.com/mieubrisse/open-spirit-island/game/game_state/island/filter"
-	"github.com/mieubrisse/open-spirit-island/game/game_state/island/land_type"
-	"github.com/mieubrisse/open-spirit-island/game/input"
-	"sort"
-	"strings"
-)
-
+/*
 var ReclaimAllCardsTransition = GameStateTransition{
 	ReadableStr: "All✋",
 	TransitionFunction: func(state game_state.GameState) game_state.GameState {
@@ -66,3 +56,5 @@ func NewGainEnergyTransition(energy int) GameStateTransition {
 		TransitionFunction: transitionFunc,
 	}
 }
+
+*/

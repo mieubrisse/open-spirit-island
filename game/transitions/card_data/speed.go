@@ -1,4 +1,4 @@
-package power
+package card_data
 
 type PowerCardSpeed int
 

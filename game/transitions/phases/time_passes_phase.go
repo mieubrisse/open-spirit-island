@@ -2,23 +2,25 @@ package phases
 
 import (
 	"github.com/mieubrisse/open-spirit-island/game/game_state"
-	"github.com/mieubrisse/open-spirit-island/game/game_state/island"
 )
 
 func RunTimePassesPhase(state game_state.GameState) game_state.GameState {
 	for _, land := range state.BoardState.Lands {
 		// Heal everything
-		for i := 0; i < len(land.CityHealth); i++ {
-			land.CityHealth[i] = island.CityBaseHealth
+		// NOTE: I couldn't find a ruling on whether an expiring healh buff would kill objects
+		// who've taken more-than-normal amount of damage
+		// I'm going with the sensible thing, which is that if the object survives, it will heal
+		for i := 0; i < len(land.CityDamageTaken); i++ {
+			land.CityDamageTaken[i] = 0
 		}
-		for i := 0; i < len(land.TownHealth); i++ {
-			land.TownHealth[i] = island.TownBaseHealth
+		for i := 0; i < len(land.TownDamageTaken); i++ {
+			land.TownDamageTaken[i] = 0
 		}
-		for i := 0; i < len(land.ExplorerHealth); i++ {
-			land.ExplorerHealth[i] = island.ExplorerBaseHealth
+		for i := 0; i < len(land.ExplorerDamageTaken); i++ {
+			land.ExplorerDamageTaken[i] = 0
 		}
-		for i := 0; i < len(land.DahanHealth); i++ {
-			land.DahanHealth[i] = island.DahanBaseHealth
+		for i := 0; i < len(land.DahanDamageTaken); i++ {
+			land.DahanDamageTaken[i] = 0
 		}
 
 		// TODO remove defend tokens
@@ -26,8 +28,9 @@ func RunTimePassesPhase(state game_state.GameState) game_state.GameState {
 		// TODO remove various skip tokens
 	}
 
-	// Move all played cards to discord
-	state.PlayerState.Played
+	// TODO Move all played cards to discord
+
+	// TODO kill any Dahan or invaders whose health total has dropped
 
 	state.Phase = game_state.SpiritGrow
 	return state

@@ -3,7 +3,7 @@ package input
 import (
 	"bufio"
 	"fmt"
-	"github.com/mieubrisse/open-spirit-island/game/game_state/island"
+	"github.com/mieubrisse/open-spirit-island/game/game_state/island/land_state"
 	"os"
 	"strconv"
 	"strings"
@@ -12,50 +12,70 @@ import (
 // Allocates damage to the invaders
 func DamageInvaders(
 	actorDescription string,
-	currentCityHp []int,
-	currentTownHp []int,
-	currentExplorerHp []int,
+	land land_state.LandState,
 	damageToAllocate int,
-) ([]int, []int, []int) {
-	numCities := len(currentCityHp)
-	numTowns := len(currentTownHp)
-	numExplorers := len(currentExplorerHp)
-	if damageToAllocate == 0 || (numCities == 0 && numTowns == 0 && numExplorers == 0) {
-		return currentCityHp, currentTownHp, currentExplorerHp
+) land_state.LandState {
+
+	numCities := len(land.CityDamageTaken)
+	numTowns := len(land.TownDamageTaken)
+	numExplorers := len(land.ExplorerDamageTaken)
+	if damageToAllocate == 0 ||
+		(numCities == 0 && numTowns == 0 && numExplorers == 0) {
+
+		return land
 	}
 
-	totalInvaderHealth := island.CityBaseHealth*numCities + island.TownBaseHealth*numTowns + island.ExplorerBaseHealth*numExplorers
-	if damageToAllocate > totalInvaderHealth {
-		return []int(nil), []int(nil), []int(nil)
+	// Convenience so we don't require user input when there's enough damage to kill all the explorers
+	fullClearDamageNeeded := 0
+	for _, damageTaken := range land.CityDamageTaken {
+		fullClearDamageNeeded += land.CityHealth - damageTaken
+	}
+	for _, damageTaken := range land.TownDamageTaken {
+		fullClearDamageNeeded += land.TownHealth - damageTaken
+	}
+	for _, damageTaken := range land.ExplorerDamageTaken {
+		fullClearDamageNeeded += land.ExplorerHealth - damageTaken
+	}
+	if damageToAllocate >= fullClearDamageNeeded {
+		land.CityDamageTaken = []int{}
+		land.TownDamageTaken = []int{}
+		land.ExplorerDamageTaken = []int{}
+	}
+
+	// Convenience so we don't require user input when cleaning out lands with just 1HP explorers
+	if land.ExplorerHealth == 1 && numExplorers > 0 && numTowns == 0 && numCities == 0 {
+		explorersToRemain := numExplorers - damageToAllocate
+		land.ExplorerDamageTaken = land.ExplorerDamageTaken[:explorersToRemain]
+		return land
 	}
 
 	fmt.Println(fmt.Sprintf("%s will deal %d damage to the invaders:", actorDescription, damageToAllocate))
 
 	optionIdx := 0
-	for _, cityHp := range currentCityHp {
+	for _, damageTaken := range land.CityDamageTaken {
 		fmt.Println(fmt.Sprintf(
 			" %s) City (%d/%d)",
 			base26Encode(optionIdx),
-			cityHp,
-			island.CityBaseHealth,
+			land.CityHealth-damageTaken,
+			land.CityHealth,
 		))
 		optionIdx++
 	}
-	for _, townHp := range currentTownHp {
+	for _, damageTaken := range land.TownDamageTaken {
 		fmt.Println(fmt.Sprintf(
 			" %s) Town (%d/%d)",
 			base26Encode(optionIdx),
-			townHp,
-			island.TownBaseHealth,
+			land.TownHealth-damageTaken,
+			land.TownHealth,
 		))
 		optionIdx++
 	}
-	for _, explorerHp := range currentExplorerHp {
+	for _, damageTaken := range land.ExplorerDamageTaken {
 		fmt.Println(fmt.Sprintf(
 			" %s) Explorer (%d/%d)",
 			base26Encode(optionIdx),
-			explorerHp,
-			island.ExplorerBaseHealth,
+			land.ExplorerHealth-damageTaken,
+			land.ExplorerHealth,
 		))
 		optionIdx++
 	}
@@ -111,37 +131,46 @@ allocationLoop:
 			}
 
 			if invaderIdx < numCities {
-				if damage > currentCityHp[invaderIdx] {
+				// First C entries are cities
+
+				cityHealthRemaining := land.CityHealth - land.CityDamageTaken[invaderIdx]
+				if damage > cityHealthRemaining {
 					fmt.Println(fmt.Sprintf(
 						"Allocation '%s' attempts to damage City '%s' for %d, but it only has %d HP",
 						field,
 						optionStr,
 						damage,
-						currentCityHp[invaderIdx],
+						cityHealthRemaining,
 					))
 					continue allocationLoop
 				}
 			} else if invaderIdx < numCities+numTowns {
+				// Next T entries are towns
+
 				townArrIdx := invaderIdx - numCities
-				if damage > currentTownHp[townArrIdx] {
+				townHealthRemaining := land.TownHealth - land.TownDamageTaken[townArrIdx]
+				if damage > townHealthRemaining {
 					fmt.Println(fmt.Sprintf(
 						"Allocation '%s' attempts to damage Town '%s' for %d, but it only has %d HP",
 						field,
 						optionStr,
 						damage,
-						currentTownHp[townArrIdx],
+						townHealthRemaining,
 					))
 					continue allocationLoop
 				}
 			} else if invaderIdx < numCities+numTowns+numExplorers {
+				// Last E entries are explorers
+
 				explorersArrIdx := invaderIdx - numCities - numTowns
-				if damage > currentExplorerHp[explorersArrIdx] {
+				explorerHealthRemaining := land.TownHealth - land.TownDamageTaken[explorersArrIdx]
+				if damage > explorerHealthRemaining {
 					fmt.Println(fmt.Sprintf(
 						"Allocation '%s' attempts to damage Explorer '%s' for %d, but it only has %d HP",
 						field,
 						optionStr,
 						damage,
-						currentTownHp[explorersArrIdx],
+						explorerHealthRemaining,
 					))
 					continue allocationLoop
 				}
@@ -163,41 +192,45 @@ allocationLoop:
 		break
 	}
 
-	var workingCopyCityHp, workingCopyTownHp, workingCopyExplorerHp []int
-	copy(workingCopyCityHp, currentCityHp)
-	copy(workingCopyTownHp, currentTownHp)
-	copy(workingCopyExplorerHp, currentExplorerHp)
+	var cityDamageTakenCopy, townDamageTakenCopy, explorerDamageTakenCopy []int
+	copy(cityDamageTakenCopy, land.CityDamageTaken)
+	copy(townDamageTakenCopy, land.TownDamageTaken)
+	copy(explorerDamageTakenCopy, land.ExplorerDamageTaken)
 
 	for invaderIdx, damage := range allocation {
 		// User selected a city
 		if invaderIdx < numCities {
-			currentCityHp[invaderIdx] -= damage
+			cityDamageTakenCopy[invaderIdx] += damage
 		} else if invaderIdx < numCities+numTowns {
-			currentTownHp[invaderIdx-numCities] -= damage
+			townDamageTakenCopy[invaderIdx-numCities] += damage
 		} else if invaderIdx < numCities+numTowns+numExplorers {
-			currentExplorerHp[invaderIdx-numCities-numTowns] -= damage
+			explorerDamageTakenCopy[invaderIdx-numCities-numTowns] += damage
 		} else {
 			// Should never happen
 			panic(fmt.Sprintf("Attempted to apply damage to unknown invader idx %d; this should not have passed validation", invaderIdx))
 		}
 	}
 
-	var resultCityHp, resultTownHp, resultExplorerHp []int
-	for _, cityHp := range currentCityHp {
-		if cityHp > 0 {
-			resultCityHp = append(resultCityHp, cityHp)
+	var resultCityDamageTaken, resultTownDamageTaken, resultExplorerDamageTaken []int
+	for _, damageTaken := range cityDamageTakenCopy {
+		if damageTaken < land.CityHealth {
+			resultCityDamageTaken = append(resultCityDamageTaken, damageTaken)
 		}
 	}
-	for _, townHp := range currentTownHp {
-		if townHp > 0 {
-			resultTownHp = append(resultTownHp, townHp)
+	for _, damageTaken := range townDamageTakenCopy {
+		if damageTaken < land.TownHealth {
+			resultTownDamageTaken = append(resultTownDamageTaken, damageTaken)
 		}
 	}
-	for _, explorerHp := range currentExplorerHp {
-		if explorerHp > 0 {
-			resultExplorerHp = append(resultExplorerHp, explorerHp)
+	for _, damageTaken := range explorerDamageTakenCopy {
+		if damageTaken < land.ExplorerHealth {
+			resultExplorerDamageTaken = append(resultExplorerDamageTaken, damageTaken)
 		}
 	}
 
-	return resultCityHp, resultTownHp, resultExplorerHp
+	land.CityDamageTaken = resultCityDamageTaken
+	land.TownDamageTaken = resultTownDamageTaken
+	land.ExplorerDamageTaken = resultExplorerDamageTaken
+
+	return land
 }
