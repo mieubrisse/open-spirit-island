@@ -9,6 +9,8 @@ import (
 )
 
 type GameState struct {
+	Phase GamePhase
+
 	/*
 		MajorPowersDeck    []power.Power
 		MajorPowersDiscord []power.Power

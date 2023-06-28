@@ -1,21 +1,21 @@
 package game_state
 
-/*
 type GamePhase int
 
 const (
-	SpiritGrowth GamePhase = iota
-	SpiritGainEnergy
+	SpiritGrow GamePhase = iota
+	SpiritGainTrackBenefits
 	SpiritPowerPlays
 	FastPower
-	InvaderBlightedIsland
-	InvaderFear
-	InvaderRavage
-	InvaderBuild
-	InvaderExplore
-	InvaderAdvance
+	Invader
+	/*
+		InvaderBlightedIsland
+		InvaderFear
+		InvaderRavage
+		InvaderBuild
+		InvaderExplore
+		InvaderAdvance
+	*/
 	SlowPower
-	TimePassesDiscard
-	TimePassesHeal
+	TimePasses
 )
-*/

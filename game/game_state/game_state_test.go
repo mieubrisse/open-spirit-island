@@ -1,6 +1,7 @@
 package game_state
 
 import (
+	"github.com/mieubrisse/open-spirit-island/game"
 	"github.com/mieubrisse/open-spirit-island/game/game_state/island"
 	"github.com/mieubrisse/open-spirit-island/game/game_state/island/land_state"
 	"github.com/mieubrisse/open-spirit-island/game/game_state/island/land_type"
@@ -204,14 +205,14 @@ func TestGameState_RunInvaderPhase(t *testing.T) {
 
 func TestGameState_efficientlyDamageDahan(t *testing.T) {
 	// No Dahan
-	require.Equal(t, []int(nil), efficientlyDamageDahan([]int{}, 10))
+	require.Equal(t, []int(nil), game.efficientlyDamageDahan([]int{}, 10))
 
 	// No damage
-	require.Equal(t, []int{2, 1}, efficientlyDamageDahan([]int{2, 1}, 0))
+	require.Equal(t, []int{2, 1}, game.efficientlyDamageDahan([]int{2, 1}, 0))
 
 	// Efficient culling
-	require.Equal(t, []int{1, 2}, efficientlyDamageDahan([]int{2, 1, 2, 1, 1}, 4))
+	require.Equal(t, []int{1, 2}, game.efficientlyDamageDahan([]int{2, 1, 2, 1, 1}, 4))
 
 	// Strong Dahan
-	require.Equal(t, []int{1, 4}, efficientlyDamageDahan([]int{4, 4}, 3))
+	require.Equal(t, []int{1, 4}, game.efficientlyDamageDahan([]int{4, 4}, 3))
 }
