@@ -7,7 +7,7 @@ import (
 	"github.com/mieubrisse/open-spirit-island/game/game_state/decks/power/default_power_cards"
 	"github.com/mieubrisse/open-spirit-island/game/game_state/island/land_type"
 	"github.com/mieubrisse/open-spirit-island/game/game_state/status"
-	"github.com/mieubrisse/open-spirit-island/game/phases"
+	phases2 "github.com/mieubrisse/open-spirit-island/game/transitions/phases"
 	"github.com/mieubrisse/open-spirit-island/game/utils"
 )
 
@@ -31,7 +31,7 @@ func RunGameLoop() {
 
 	// First explore
 	printSection("Initial State")
-	gameState = phases.RunInvaderPhase(gameState)
+	gameState = phases2.RunInvaderPhase(gameState)
 	fmt.Println(gameState.String())
 
 	// This is the inner simulation loop; nearly every player action will result in coming back here
@@ -41,16 +41,16 @@ func RunGameLoop() {
 
 		switch gameState.Phase {
 		case game_state.SpiritGrow:
-			gameState = phases.RunSpiritGrowPhase(gameState)
+			gameState = phases2.RunSpiritGrowPhase(gameState)
 		case game_state.SpiritGainTrackBenefits:
-			gameState = phases.RunSpiritGainTrackBenefitsPhase(gameState)
+			gameState = phases2.RunSpiritGainTrackBenefitsPhase(gameState)
 		case game_state.SpiritPowerPlays:
-			gameState = phases.RunSpiritPlayPowerPhase(gameState)
+			gameState = phases2.RunSpiritPlayPowerPhase(gameState)
 		case game_state.FastPower:
 			// TODO implement
 			gameState.Phase++
 		case game_state.Invader:
-			gameState = phases.RunInvaderPhase(gameState)
+			gameState = phases2.RunInvaderPhase(gameState)
 		case game_state.SlowPower:
 			// TODO implement
 			gameState.Phase++

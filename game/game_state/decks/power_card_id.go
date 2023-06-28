@@ -1,5 +1,6 @@
 package decks
 
+//go:generate go run github.com/dmarkham/enumer -type=PowerCardID
 type PowerCardID int
 
 const (

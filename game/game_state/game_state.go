@@ -5,7 +5,6 @@ import (
 	"github.com/mieubrisse/open-spirit-island/game/game_state/island"
 	"github.com/mieubrisse/open-spirit-island/game/game_state/player"
 	"github.com/mieubrisse/open-spirit-island/game/game_state/status"
-	"strings"
 )
 
 type GameState struct {
@@ -73,29 +72,3 @@ func (state GameState) GetStatus() status.GameStatus {
 
 	return status.Undecided
 }
-
-func (state GameState) String() string {
-	lines := []string{
-		state.InvaderState.String(),
-		state.BoardState.String(),
-		// TODO multiple players
-		"                                  PLAYER",
-		state.PlayerState.String(),
-	}
-
-	currentStatus := state.GetStatus()
-
-	header := []string{}
-	if currentStatus != status.Undecided {
-		header = []string{
-			"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
-			"                                            " + strings.ToUpper(currentStatus.String()),
-			"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
-		}
-	}
-	lines = append(header, lines...)
-
-	return strings.Join(lines, "\n")
-}
-
-// TODO get the score
